@@ -20,6 +20,7 @@
 يتطلب هذا الملف وجود invoice_data.py في نفس المجلد.
 """
 
+
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 import csv
@@ -88,6 +89,137 @@ COL_SELECT = "#DCE9F8"      # لون تحديد الصف في الجداول
 ARABIC_MONTHS = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
                  "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"]
 ARABIC_WEEKDAYS = ["اثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت", "أحد"]
+
+ARABIC_UNITS = ["صفر", "واحد", "اثنان", "ثلاثة", "أربعة", "خمسة", "ستة", "سبعة", "ثمانية", "تسعة",
+                "عشرة", "أحد عشر", "اثنا عشر", "ثلاثة عشر", "أربعة عشر", "خمسة عشر", "ستة عشر", "سبعة عشر", "ثمانية عشر", "تسعة عشر"]
+ARABIC_TENS = {
+    20: "عشرون", 30: "ثلاثون", 40: "أربعون", 50: "خمسون", 60: "ستون",
+    70: "سبعون", 80: "ثمانون", 90: "تسعون"
+}
+ARABIC_HUNDREDS = {
+    100: "مائة", 200: "مائتان", 300: "ثلاثمائة", 400: "أربعمائة", 500: "خمسمائة",
+    600: "ستمائة", 700: "سبعمائة", 800: "ثمانمائة", 900: "تسعمائة"
+}
+
+
+def arabic_int_to_words(n):
+    if n < 0:
+        return "سالب " + arabic_int_to_words(-n)
+    if n < 20:
+        return ARABIC_UNITS[n]
+    if n < 100:
+        if n in ARABIC_TENS:
+            return ARABIC_TENS[n]
+        unit = n % 10
+        tens = n - unit
+        return f"{ARABIC_UNITS[unit]} و {ARABIC_TENS[tens]}"
+    if n < 1000:
+        if n in ARABIC_HUNDREDS:
+            return ARABIC_HUNDREDS[n]
+        hundreds = n - (n % 100)
+        remainder = n % 100
+        return f"{ARABIC_HUNDREDS[hundreds]} و {arabic_int_to_words(remainder)}"
+    if n < 1000000:
+        thousands = n // 1000
+        remainder = n % 1000
+        if thousands == 1:
+            prefix = "ألف"
+        elif thousands == 2:
+            prefix = "ألفان"
+        elif 3 <= thousands <= 10:
+            prefix = f"{arabic_int_to_words(thousands)} آلاف"
+        else:
+            prefix = f"{arabic_int_to_words(thousands)} ألف"
+        return f"{prefix} و {arabic_int_to_words(remainder)}" if remainder else prefix
+    if n < 1000000000:
+        millions = n // 1000000
+        remainder = n % 1000000
+        if millions == 1:
+            prefix = "مليون"
+        elif millions == 2:
+            prefix = "مليونان"
+        elif 3 <= millions <= 10:
+            prefix = f"{arabic_int_to_words(millions)} ملايين"
+        else:
+            prefix = f"{arabic_int_to_words(millions)} مليون"
+        return f"{prefix} و {arabic_int_to_words(remainder)}" if remainder else prefix
+    return str(n)
+
+
+def arabic_currency_words(amount):
+    try:
+        total_fils = round(float(amount) * 1000)
+    except (TypeError, ValueError):
+        return ""
+    dinars = total_fils // 1000
+    fils = total_fils % 1000
+    if dinars == 0 and fils == 0:
+        return "صفر دينار كويتي فقط لا غير"
+    parts = []
+    if dinars:
+        parts.append(f"{arabic_int_to_words(dinars)} دينار كويتي")
+    if fils:
+        parts.append(f"{arabic_int_to_words(fils)} فلساً")
+    return " و ".join(parts) + " فقط لا غير"
+
+
+def english_int_to_words(n):
+    """Convert integer n (0..999999999) to English words (simple)."""
+    to19 = ['zero','one','two','three','four','five','six','seven','eight','nine',
+            'ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen',
+            'seventeen','eighteen','nineteen']
+    tens = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety']
+
+    def _under_thousand(num):
+        if num < 20:
+            return to19[num]
+        if num < 100:
+            t = num // 10
+            r = num % 10
+            return tens[t] + ('' if r == 0 else ' ' + to19[r])
+        h = num // 100
+        r = num % 100
+        return to19[h] + ' hundred' + ('' if r == 0 else ' ' + _under_thousand(r))
+
+    if n < 0:
+        return 'minus ' + english_int_to_words(-n)
+    if n < 1000:
+        return _under_thousand(n)
+    if n < 1000000:
+        k = n // 1000
+        r = n % 1000
+        return _under_thousand(k) + ' thousand' + ('' if r == 0 else ' ' + _under_thousand(r))
+    if n < 1000000000:
+        m = n // 1000000
+        r = n % 1000000
+        return _under_thousand(m) + ' million' + ('' if r == 0 else ' ' + english_int_to_words(r))
+    return str(n)
+
+
+def english_currency_words(amount):
+    try:
+        total_fils = round(float(amount) * 1000)
+    except (TypeError, ValueError):
+        return ""
+    dinars = total_fils // 1000
+    fils = total_fils % 1000
+    if dinars == 0 and fils == 0:
+        return 'zero Kuwaiti dinars only'
+    parts = []
+    if dinars:
+        parts.append(f"{english_int_to_words(dinars)} Kuwaiti dinar{'s' if dinars != 1 else ''}")
+    if fils:
+        parts.append(f"{english_int_to_words(fils)} fils")
+    return ' and '.join(parts) + ' only'
+
+
+def fmt_fils3(v):
+    if v in (None, ""):
+        return ""
+    try:
+        return f"{int(v):03d}"
+    except (TypeError, ValueError):
+        return str(v)
 
 
 def open_date_picker(parent, string_var):
@@ -286,15 +418,16 @@ class InvoiceApp(_BaseWindow):
             (self.tab_payments, "💳", "الدفعات والأرصدة"),
         ]
         for tab, icon, title in nav_items:
-            btn = tk.Label(sidebar, text=f"{title}   {icon}", bg=COL_CARD, fg=COL_NAVY,
+            container = ttk.Frame(sidebar, style="NavCard.TFrame")
+            container.pack(fill="x", pady=6)
+            label = tk.Label(container, text=f"{title}   {icon}", bg=COL_CARD, fg=COL_NAVY,
                             font=get_tk_font(10, "bold"), padx=14, pady=12, anchor="e",
-                            cursor="hand2", highlightthickness=1,
-                            highlightbackground=COL_BORDER, highlightcolor=COL_BORDER)
-            btn.pack(fill="x", pady=4)
-            btn.bind("<Button-1>", lambda e, t=tab: self.notebook.select(t))
-            btn.bind("<Enter>", lambda e, b=btn: self._on_nav_hover(b, True))
-            btn.bind("<Leave>", lambda e, b=btn: self._on_nav_hover(b, False))
-            self.nav_buttons.append((btn, tab))
+                            cursor="hand2")
+            label.pack(fill="both", expand=True)
+            label.bind("<Button-1>", lambda e, t=tab: self.notebook.select(t))
+            label.bind("<Enter>", lambda e, c=container: self._on_nav_hover(c, True))
+            label.bind("<Leave>", lambda e, c=container: self._on_nav_hover(c, False))
+            self.nav_buttons.append((container, label, tab))
 
         tk.Frame(sidebar, bg=COL_BG, height=20).pack()
         version_lbl = tk.Label(sidebar, text="Al Estidama © 2026", bg=COL_BG, fg=COL_MUTED, font=get_tk_font(7))
@@ -317,17 +450,17 @@ class InvoiceApp(_BaseWindow):
 
     def _refresh_nav_selection(self):
         active = self.notebook.select()
-        for btn, tab in self.nav_buttons:
+        for container, label, tab in self.nav_buttons:
             is_active = str(tab) == active
-            btn.configure(bg=COL_NAVY if is_active else COL_CARD,
-                         fg="white" if is_active else COL_NAVY,
-                         highlightbackground=COL_NAVY if is_active else COL_BORDER)
+            container.configure(style="ActiveNavCard.TFrame" if is_active else "NavCard.TFrame")
+            label.configure(bg=COL_NAVY if is_active else COL_CARD,
+                            fg="white" if is_active else COL_NAVY)
 
-    def _on_nav_hover(self, btn, entering):
+    def _on_nav_hover(self, container, entering):
         active = self.notebook.select()
-        for b, tab in self.nav_buttons:
-            if b is btn and str(tab) != active:
-                btn.configure(bg=COL_NAVY_SOFT if entering else COL_CARD)
+        for c, label, tab in self.nav_buttons:
+            if c is container and str(tab) != active:
+                c.configure(style="HoverNavCard.TFrame" if entering else "NavCard.TFrame")
                 return
 
     def _on_tab_changed(self, event=None):
@@ -358,40 +491,53 @@ class InvoiceApp(_BaseWindow):
             pass
         self._style.configure("TNotebook.Tab", font=get_tk_font(10, "bold"), padding=(0, 0))
 
-        # ---- بطاقات (LabelFrame) بأسلوب موحّد وأنعم ----
-        self._style.configure("Card.TLabelframe", background=COL_CARD, foreground=COL_TEXT, borderwidth=1,
-                              relief="solid", bordercolor=COL_BORDER)
-        self._style.configure("Card.TLabelframe.Label", font=get_tk_font(10, "bold"), background=COL_CARD, foreground=COL_NAVY)
-        self._style.configure("Card.TLabel", background=COL_CARD, foreground=COL_TEXT)
+        self._style.configure("Card.TFrame", background=COL_CARD, relief="solid", bordercolor=COL_BORDER_SOFT, borderwidth=1)
+        self._style.configure("Card.TLabel", background=COL_CARD, foreground=COL_TEXT, font=get_tk_font(10))
+        self._style.configure("CardHeader.TLabel", background=COL_CARD, foreground=COL_NAVY, font=get_tk_font(11, "bold"))
+        self._style.configure("CardSubtext.TLabel", background=COL_CARD, foreground=COL_SUBTEXT, font=get_tk_font(9))
+        self._style.configure("Card.Soft.TFrame", background=COL_CARD_SOFT, relief="solid", bordercolor=COL_BORDER_SOFT, borderwidth=1)
+        self._style.configure("NavCard.TFrame", background=COL_CARD, relief="flat", bordercolor=COL_BORDER_SOFT, borderwidth=1)
+        self._style.configure("HoverNavCard.TFrame", background=COL_NAVY_SOFT, relief="flat", bordercolor=COL_BORDER_SOFT, borderwidth=1)
+        self._style.configure("ActiveNavCard.TFrame", background=COL_NAVY, relief="flat", bordercolor=COL_BORDER_SOFT, borderwidth=1)
+        self._style.configure("NavCard.TLabel", background=COL_CARD, foreground=COL_NAVY, font=get_tk_font(10, "bold"))
+        self._style.configure("ActiveNavCard.TLabel", background=COL_NAVY, foreground="white", font=get_tk_font(10, "bold"))
 
         # ---- أزرار ----
         self._style.configure("Accent.TButton", font=get_tk_font(10, "bold"), foreground="white", background=COL_NAVY,
-                              borderwidth=0, focusthickness=0, padding=(16, 9))
+                              borderwidth=0, focusthickness=0, padding=(18, 10))
         self._style.map("Accent.TButton", background=[("active", COL_NAVY_DARK), ("pressed", COL_NAVY_DARK)])
         self._style.configure("Gold.TButton", font=get_tk_font(10, "bold"), foreground="white", background=COL_GOLD,
-                              borderwidth=0, padding=(16, 9))
+                              borderwidth=0, padding=(18, 10))
         self._style.map("Gold.TButton", background=[("active", COL_GOLD_DARK), ("pressed", COL_GOLD_DARK)])
         self._style.configure("Danger.TButton", font=get_tk_font(10, "bold"), foreground="white", background=COL_DANGER,
-                              borderwidth=0, padding=(14, 8))
+                              borderwidth=0, padding=(16, 9))
         self._style.map("Danger.TButton", background=[("active", "#8F1D17"), ("pressed", "#8F1D17")])
         self._style.configure("Ghost.TButton", font=get_tk_font(10), foreground=COL_NAVY, background=COL_CARD,
-                              borderwidth=1, padding=(14, 8))
+                              borderwidth=1, padding=(16, 9))
         self._style.map("Ghost.TButton", background=[("active", COL_NAVY_SOFT)], relief=[("pressed", "sunken")])
-        self._style.configure("TButton", font=get_tk_font(10), padding=(12, 7))
+        self._style.configure("TButton", font=get_tk_font(10), padding=(14, 9), relief="flat")
+
+        self._style.configure("Flat.TEntry", padding=(10, 8), relief="flat",
+                              fieldbackground=COL_CARD, background=COL_CARD, foreground=COL_TEXT)
+        self._style.map("Flat.TEntry",
+                        fieldbackground=[("active", "white"), ("!disabled", COL_CARD)])
+        self._style.configure("TCombobox", padding=(10, 8), relief="flat", foreground=COL_TEXT)
 
         # ---- الجداول (Treeview) بمظهر أنعم وصف مرتفع قليلاً لسهولة القراءة ----
         self._style.configure("Treeview", font=get_tk_font(10), rowheight=30, background=COL_CARD,
                               fieldbackground=COL_CARD, borderwidth=0, relief="flat")
         self._style.configure("Treeview.Heading", font=get_tk_font(9, "bold"),
-                              background=COL_NAVY, foreground="white", relief="flat", padding=(8, 10))
+                              background=COL_NAVY, foreground="white", relief="flat", padding=(10, 10))
         self._style.map("Treeview.Heading", background=[("active", COL_NAVY_DARK)])
         self._style.map("Treeview", background=[("selected", COL_SELECT)], foreground=[("selected", COL_TEXT)])
         self._style.layout("Treeview", [("Treeview.treearea", {"sticky": "nswe"})])
+        # نمط مطبق على جدول تخصيص الدفعة للفواتير فقط (صفوف مضغوطة لتوفير
+        # المساحة العمودية داخل شريط الدفع)؛ يرث باقي الإعدادات من "Treeview".
+        self._style.configure("CompactTree.Treeview", rowheight=18)
+        self._style.configure("CompactTree.Treeview.Heading", padding=(6, 3))
 
         self._style.configure("TLabelframe", background=COL_BG, borderwidth=1, relief="solid", bordercolor=COL_BORDER)
         self._style.configure("TLabelframe.Label", font=get_tk_font(10, "bold"), background=COL_BG, foreground=COL_NAVY)
-        self._style.configure("TCombobox", padding=(8, 5))
-        self._style.configure("TEntry", padding=(8, 5))
 
         # ---- بطاقة KPI في لوحة المعلومات ----
         self._style.configure("Kpi.TFrame", background=COL_CARD, relief="solid", borderwidth=1, bordercolor=COL_BORDER)
@@ -536,12 +682,14 @@ class InvoiceApp(_BaseWindow):
         row1 = tk.Frame(top_pad, bg=COL_CARD)
         row1.pack(fill="x")
 
-        tk.Label(row1, text="🔍 بحث (رقم الفاتورة / اسم العميل):", bg=COL_CARD, fg=COL_TEXT, font=get_tk_font(10)).pack(side="right", padx=(6, 2))
+        tk.Label(row1, text="🔍 بحث (رقم الفاتورة / اسم العميل / رقم البيان الجمركي):", bg=COL_CARD, fg=COL_TEXT, font=get_tk_font(10)).pack(side="right", padx=(6, 2))
         self.search_var = tk.StringVar()
         self.search_var.trace_add("write", lambda *a: self.refresh_invoice_list())
         search_entry = tk.Entry(row1, textvariable=self.search_var, font=get_tk_font(10), width=28, justify="right",
-                                 relief="solid", bd=1, highlightthickness=1, highlightbackground=COL_BORDER)
+                     relief="solid", bd=1, highlightthickness=1, highlightbackground=COL_BORDER)
         search_entry.pack(side="right", padx=4, ipady=3)
+
+        # (Declaration-number search merged into general search box)
 
         ttk.Button(row1, text="＋ فاتورة جديدة", style="Accent.TButton", command=self.open_new_invoice).pack(side="right", padx=3)
         ttk.Button(row1, text="✎ تعديل", style="Ghost.TButton", command=self.edit_selected_invoice).pack(side="right", padx=3)
@@ -570,18 +718,18 @@ class InvoiceApp(_BaseWindow):
         self.filter_customer_combo.configure(postcommand=self._refresh_customer_filter_values)
         self._refresh_customer_filter_values()
 
-        tk.Label(row2, text="إلى تاريخ:", bg=COL_CARD, fg=COL_TEXT, font=get_tk_font(10)).pack(side="right", padx=(10, 2))
-        self.filter_to_var = tk.StringVar()
-        self.filter_to_var.trace_add("write", lambda *a: self.refresh_invoice_list())
-        to_row, _ = build_date_field(row2, self.filter_to_var)
-        to_row.pack(side="right", padx=4)
-
         tk.Label(row2, text="من تاريخ:", bg=COL_CARD, fg=COL_TEXT, font=get_tk_font(10)).pack(side="right", padx=(10, 2))
         self.filter_from_var = tk.StringVar()
         self.filter_from_var.trace_add("write", lambda *a: self.refresh_invoice_list())
         from_row, _ = build_date_field(row2, self.filter_from_var)
         from_row.pack(side="right", padx=4)
 
+        tk.Label(row2, text="إلى تاريخ:", bg=COL_CARD, fg=COL_TEXT, font=get_tk_font(10)).pack(side="right", padx=(10, 2))
+        self.filter_to_var = tk.StringVar()
+        self.filter_to_var.trace_add("write", lambda *a: self.refresh_invoice_list())
+        to_row, _ = build_date_field(row2, self.filter_to_var)
+        to_row.pack(side="right", padx=4)
+        
         ttk.Button(row2, text="✕ مسح التصفية", style="Ghost.TButton", command=self.clear_invoice_filters).pack(side="right", padx=4)
         ttk.Button(row2, text="📄 كشف حساب العميل", style="Ghost.TButton", command=self.print_customer_statement).pack(side="right", padx=4)
 
@@ -599,11 +747,13 @@ class InvoiceApp(_BaseWindow):
         table_card = tk.Frame(wrap, bg=COL_CARD, highlightthickness=1, highlightbackground=COL_BORDER)
         table_card.pack(fill="both", expand=True)
 
-        cols = ("invno", "date", "customer", "port", "total", "paid", "balance", "status")
-        headers = {"invno": "رقم الفاتورة", "date": "التاريخ", "customer": "السادة/العميل",
+
+
+        cols = ("invno", "declno", "date", "customer", "port", "total", "paid", "balance", "status")
+        headers = {"invno": "رقم الفاتورة", "declno": "رقم البيان الجمركي" , "date": "التاريخ", "customer": "السادة/العميل",
                    "port": "المنفذ", "total": "الإجمالي (د.ك)", "paid": "المدفوع (د.ك)",
                    "balance": "المتبقي (د.ك)", "status": "الحالة"}
-        widths = {"invno": 100, "date": 100, "customer": 200, "port": 110,
+        widths = {"invno": 100, "declno": 100, "date": 100, "customer": 200, "port": 110,
                   "total": 110, "paid": 110, "balance": 110, "status": 120}
         self.tree = ttk.Treeview(table_card, columns=cols, show="headings", selectmode="extended")
         self.tree["displaycolumns"] = tuple(reversed(cols))
@@ -620,6 +770,7 @@ class InvoiceApp(_BaseWindow):
 
     def refresh_invoice_list(self):
         query = (self.search_var.get() or "").strip().lower()
+        # merged declno searching into the main query; no separate decl_query
         customer_filter = self.filter_customer_var.get() if hasattr(self, "filter_customer_var") else "الكل"
         date_from = (self.filter_from_var.get() or "").strip() if hasattr(self, "filter_from_var") else ""
         date_to = (self.filter_to_var.get() or "").strip() if hasattr(self, "filter_to_var") else ""
@@ -631,12 +782,13 @@ class InvoiceApp(_BaseWindow):
         filtered = []
         for inv in self._all_invoices:
             # بحث حر برقم الفاتورة أو اسم العميل
-            hay = f"{inv.get('invno','')} {inv.get('customer','')}".lower()
+            hay = f"{inv.get('invno','')} {inv.get('customer','')} {inv.get('declno','') }".lower()
             if query and query not in hay:
                 continue
             # تصفية حسب عميل محدد
             if customer_filter and customer_filter != "الكل" and inv.get("customer", "") != customer_filter:
                 continue
+            # (declno is covered by the general hay string)
             # تصفية حسب الفترة الزمنية (يعتمد على أن التاريخ بصيغة YYYY-MM-DD قابلة للمقارنة نصياً)
             inv_date = str(inv.get("date", ""))
             if date_from and inv_date < date_from:
@@ -656,7 +808,7 @@ class InvoiceApp(_BaseWindow):
             st = status_map.get(no, {"paid": 0.0, "balance": float(inv.get("total") or 0), "status": "unpaid"})
             stripe = "roweven" if row_idx % 2 else "rowodd"
             self.tree.insert("", "end", iid=no,
-                              values=(inv.get("invno", ""), inv.get("date", ""),
+                              values=(inv.get("invno", ""), inv.get("declno", ""), inv.get("date", ""),
                                       inv.get("customer", ""), inv.get("port", ""),
                                       f'{float(inv.get("total") or 0):.3f}',
                                       f'{st["paid"]:.3f}', f'{st["balance"]:.3f}',
@@ -712,14 +864,14 @@ class InvoiceApp(_BaseWindow):
     def print_customer_statement(self):
         customer = self.filter_customer_var.get()
         if not customer or customer == "الكل":
-            messagebox.showinfo("تنبيه", "الرجاء اختيار عميل محدد من قائمة \"العميل\" أعلاه لطباعة كشف حسابه.")
+            messagebox.showinfo("تنبيه", "الرجاء اختيار عميل محدد من قائمة \"العميل\" أعلاه لطباعة كشف حسابه")
             return
         # نجلب كل حركات هذا العميل (فواتير ودفعات) لحساب الرصيد الافتتاحي بشكل صحيح
         # قبل تصفية الفترة الزمنية المطلوبة في كشف الحساب
         all_invoices = [i for i in load_invoices() if i.get("customer") == customer]
         all_payments = [p for p in load_payments() if p.get("customer") == customer]
         if not all_invoices and not all_payments:
-            messagebox.showinfo("تنبيه", "لا توجد أي فواتير أو دفعات لهذا العميل لعرضها في كشف الحساب.")
+            messagebox.showinfo("تنبيه", "لا توجد أي فواتير أو دفعات لهذا العميل لعرضها في كشف الحساب")
             return
         generate_and_open_statement(
             customer=customer,
@@ -735,7 +887,7 @@ class InvoiceApp(_BaseWindow):
         مستنداً واحداً يجمع كشف حساب كل عميل في صفحة مستقلة قابلة للطباعة معاً."""
         names = self.all_customer_names()
         if not names:
-            messagebox.showinfo("تنبيه", "لا يوجد عملاء محفوظون بعد. أضف عملاء أولاً من تبويب \"العملاء\".")
+            messagebox.showinfo("تنبيه", "لا يوجد عملاء محفوظون بعد. أضف عملاء أولاً من تبويب \"العملاء\"")
             return
 
         win = tk.Toplevel(self)
@@ -748,7 +900,7 @@ class InvoiceApp(_BaseWindow):
 
         tk.Label(win, text="📄📄 اختر العملاء المطلوب طباعة كشوف حسابهم", bg=COL_BG, fg=COL_NAVY,
                  font=get_tk_font(11, "bold")).pack(anchor="e", padx=14, pady=(14, 4))
-        tk.Label(win, text="حدد عدة عملاء بالضغط مع Ctrl أو Shift، أو استخدم زر \"تحديد الكل\" أدناه.",
+        tk.Label(win, text="حدد عدة عملاء بالضغط مع Ctrl أو Shift، أو استخدم زر \"تحديد الكل\" أدناه",
                  bg=COL_BG, fg=COL_SUBTEXT, font=get_tk_font(9), justify="right").pack(anchor="e", padx=14)
 
         list_card = tk.Frame(win, bg=COL_CARD, highlightthickness=1, highlightbackground=COL_BORDER)
@@ -780,15 +932,15 @@ class InvoiceApp(_BaseWindow):
         period_row = tk.Frame(period_card, bg=COL_CARD)
         period_row.pack(fill="x", padx=10, pady=10)
 
-        tk.Label(period_row, text="إلى تاريخ:", bg=COL_CARD, fg=COL_TEXT, font=get_tk_font(9)).pack(side="right", padx=(6, 2))
-        dlg_to_var = tk.StringVar(value=(self.filter_to_var.get() or ""))
-        dlg_to_row, _ = build_date_field(period_row, dlg_to_var)
-        dlg_to_row.pack(side="right", padx=4)
-
         tk.Label(period_row, text="من تاريخ:", bg=COL_CARD, fg=COL_TEXT, font=get_tk_font(9)).pack(side="right", padx=(10, 2))
         dlg_from_var = tk.StringVar(value=(self.filter_from_var.get() or ""))
         dlg_from_row, _ = build_date_field(period_row, dlg_from_var)
         dlg_from_row.pack(side="right", padx=4)
+
+        tk.Label(period_row, text="إلى تاريخ:", bg=COL_CARD, fg=COL_TEXT, font=get_tk_font(9)).pack(side="right", padx=(6, 2))
+        dlg_to_var = tk.StringVar(value=(self.filter_to_var.get() or ""))
+        dlg_to_row, _ = build_date_field(period_row, dlg_to_var)
+        dlg_to_row.pack(side="right", padx=4)
 
         bottom_btns = tk.Frame(win, bg=COL_BG)
         bottom_btns.pack(fill="x", padx=14, pady=(0, 14))
@@ -796,7 +948,7 @@ class InvoiceApp(_BaseWindow):
         def do_print():
             sel_indices = names_list.curselection()
             if not sel_indices:
-                messagebox.showinfo("تنبيه", "الرجاء اختيار عميل واحد على الأقل من القائمة.", parent=win)
+                messagebox.showinfo("تنبيه", "الرجاء اختيار عميل واحد على الأقل من القائمة", parent=win)
                 return
             selected_names = [names_list.get(i) for i in sel_indices]
             date_from = (dlg_from_var.get() or "").strip()
@@ -818,7 +970,7 @@ class InvoiceApp(_BaseWindow):
                 })
 
             if not items:
-                messagebox.showinfo("تنبيه", "لا توجد أي فواتير أو دفعات لأي من العملاء المحددين.", parent=win)
+                messagebox.showinfo("تنبيه", "لا توجد أي فواتير أو دفعات لأي من العملاء المحددين", parent=win)
                 return
 
             if skipped:
@@ -836,10 +988,10 @@ class InvoiceApp(_BaseWindow):
     def _get_selected_invoice(self):
         sel = self.tree.selection()
         if not sel:
-            messagebox.showinfo("تنبيه", "الرجاء اختيار فاتورة من القائمة أولاً.")
+            messagebox.showinfo("تنبيه", "الرجاء اختيار فاتورة من القائمة أولاً")
             return None
         if len(sel) > 1:
-            messagebox.showinfo("تنبيه", "الرجاء اختيار فاتورة واحدة فقط لهذا الإجراء.")
+            messagebox.showinfo("تنبيه", "الرجاء اختيار فاتورة واحدة فقط لهذا الإجراء")
             return None
         invno = sel[0]
         for inv in self._all_invoices:
@@ -849,10 +1001,10 @@ class InvoiceApp(_BaseWindow):
 
     def _get_selected_invoices(self):
         """يعيد كل الفواتير المحددة حالياً في الجدول (يدعم تحديد أكثر من فاتورة
-        بالضغط مع Ctrl أو Shift، وهذا ما تعتمد عليه ميزة طباعة عدة فواتير دفعة واحدة)."""
+        بالضغط مع Ctrl أو Shift، وهذا ما تعتمد عليه ميزة طباعة عدة فواتير دفعة واحدة)"""
         sel = self.tree.selection()
         if not sel:
-            messagebox.showinfo("تنبيه", "الرجاء اختيار فاتورة واحدة أو أكثر من القائمة أولاً\n(يمكن تحديد عدة فواتير بالضغط مع Ctrl أو Shift أثناء التحديد).")
+            messagebox.showinfo("تنبيه", "الرجاء اختيار فاتورة واحدة أو أكثر من القائمة أولاً\n(يمكن تحديد عدة فواتير بالضغط مع Ctrl أو Shift أثناء التحديد)")
             return []
         by_no = {str(inv["invno"]): inv for inv in self._all_invoices}
         result = [by_no[str(no)] for no in sel if str(no) in by_no]
@@ -874,7 +1026,7 @@ class InvoiceApp(_BaseWindow):
         if not inv:
             return
         if messagebox.askyesno("تأكيد الحذف",
-                                f"هل أنت متأكد من حذف الفاتورة رقم {inv['invno']}؟\nلا يمكن التراجع عن هذا الإجراء."):
+                                f"هل أنت متأكد من حذف الفاتورة رقم {inv['invno']}؟\nلا يمكن التراجع عن هذا الإجراء"):
             try:
                 delete_invoice(inv["invno"])
             except SaveError as e:
@@ -1121,34 +1273,55 @@ class InvoiceApp(_BaseWindow):
         tk.Label(alloc_box, text="🧾 تخصيص الدفعة لفواتير محددة (اختياري)", bg=COL_CARD_SOFT, fg=COL_NAVY,
                  font=get_tk_font(9, "bold")).pack(anchor="e", padx=10, pady=(8, 2))
 
-        tk.Label(alloc_box,
-                 text="اختر الفواتير التي تريد تغطيتها بهذه الدفعة. المبلغ المدخل سيُوزّع على الفواتير"
-                      "المحددة بالترتيب الذي تظهر به هنا، وباقي المبلغ يبقى كرصيد عام إن لم يُستهلك.",
-                 bg=COL_CARD_SOFT, font=get_tk_font(8), fg=COL_MUTED, justify="right", anchor="e").pack(fill="x", anchor="e", padx=10)
-
-        list_row = tk.Frame(alloc_box, bg=COL_CARD_SOFT)
-        list_row.pack(fill="x", padx=10, pady=(6, 0))
-        scroll = tk.Scrollbar(list_row, orient="vertical")
-        self.p_invoices_listbox = tk.Listbox(list_row, selectmode=tk.EXTENDED, height=5,
-                                              font=("Consolas", 10), justify="right",
-                                              exportselection=False, yscrollcommand=scroll.set,
-                                              activestyle="none", relief="solid", bd=1,
-                                              selectbackground=COL_NAVY, selectforeground="white")
-        scroll.config(command=self.p_invoices_listbox.yview)
-        scroll.pack(side="right", fill="y")
-        self.p_invoices_listbox.pack(side="right", fill="both", expand=True)
-        self._p_invoice_choices = []  # قائمة موازية لعناصر القائمة: أرقام الفواتير
+        # جدول الفواتير يُظهر كل بيانات كل فاتورة (رقم، تاريخ، بيان جمركي، منفذ،
+        # نوع البضاعة، بلد المنشأ، الإجمالي، المدفوع، المتبقي، الحالة) بدلاً من
+        # سطر نصي واحد، مما يتيح للمستخدم رؤية شاملة وتحديد الفواتير بسهولة.
+        cols_pi = ("invno", "date", "declno", "port", "goodstype", "origin",
+                   "total", "paid", "balance", "status")
+        self.p_invoices_tree = ttk.Treeview(alloc_box, columns=cols_pi, show="headings",
+                                            selectmode="extended", height=3,
+                                            style="CompactTree.Treeview")
+        self.p_invoices_tree["displaycolumns"] = tuple(reversed(cols_pi))
+        headers_pi = {
+            "invno": "رقم الفاتورة", "date": "التاريخ", "declno": "رقم البيان الجمركي",
+            "port": "المنفذ", "goodstype": "نوع البضاعة", "origin": "بلد المنشأ",
+            "total": "الإجمالي (د.ك)", "paid": "المدفوع (د.ك)", "balance": "المتبقي (د.ك)",
+            "status": "الحالة",
+        }
+        widths_pi = {"invno": 95, "date": 95, "declno": 110, "port": 100,
+                     "goodstype": 120, "origin": 115, "total": 100, "paid": 100,
+                     "balance": 100, "status": 105}
+        for c in cols_pi:
+            self.p_invoices_tree.heading(c, text=headers_pi[c], anchor="e")
+            self.p_invoices_tree.column(c, anchor="e", width=widths_pi[c])
+        status_tag_map = {"paid": "st_paid", "partial": "st_partial", "unpaid": "st_unpaid"}
+        status_label_map = {"paid": "مسددة ✅", "partial": "جزئية ⏳", "unpaid": "غير مسددة ⛔"}
+        for tag in ("rowodd", "roweven"):
+            tag_bg = COL_CARD_SOFT if tag == "rowodd" else COL_ROW_ALT
+            self.p_invoices_tree.tag_configure(tag, background=tag_bg)
+        for tag in status_tag_map.values():
+            self.p_invoices_tree.tag_configure(tag, font=get_tk_font(10, "bold"))
+        self.p_invoices_tree.tag_configure("st_paid", foreground=COL_SUCCESS)
+        self.p_invoices_tree.tag_configure("st_partial", foreground=COL_WARN)
+        self.p_invoices_tree.tag_configure("st_unpaid", foreground=COL_DANGER)
+        self._p_invoice_choices = []  # قائمة موازية لعناصر الجدول: أرقام الفاتورات
+        pi_scroll = ttk.Scrollbar(alloc_box, orient="vertical", command=self.p_invoices_tree.yview)
+        self.p_invoices_tree.configure(yscrollcommand=pi_scroll.set)
+        tree_wrap = tk.Frame(alloc_box, bg=COL_CARD_SOFT)
+        tree_wrap.pack(fill="x", padx=10, pady=(6, 0))
+        pi_scroll.pack(in_=tree_wrap, side="right", fill="y")
+        self.p_invoices_tree.pack(in_=tree_wrap, side="right", fill="both", expand=True)
 
         alloc_btns = tk.Frame(alloc_box, bg=COL_CARD_SOFT)
-        alloc_btns.pack(fill="x", padx=10, pady=(6, 10))
-        ttk.Button(alloc_btns, text="⟳ تحديث قائمة الفواتير", style="Ghost.TButton", command=self._update_payment_invoice_list).pack(side="right", padx=2)
-        ttk.Button(alloc_btns, text="✕ إلغاء التحديد (دفعة عامة)", style="Ghost.TButton", command=lambda: self.p_invoices_listbox.selection_clear(0, "end")).pack(side="right", padx=2)
+        alloc_btns.pack(fill="x", padx=10, pady=(3, 6))
+        ttk.Button(alloc_btns, text="⟳ تحديث قائمة الفاتورات", style="Ghost.TButton", command=self._update_payment_invoice_list).pack(side="right", padx=2)
+        ttk.Button(alloc_btns, text="✕ إلغاء التحديد (دفعة عامة)", style="Ghost.TButton", command=lambda: self.p_invoices_tree.selection_remove(self.p_invoices_tree.get_children())).pack(side="right", padx=2)
         self.p_alloc_summary_var = tk.StringVar(value="")
         tk.Label(alloc_btns, textvariable=self.p_alloc_summary_var, bg=COL_CARD_SOFT, font=get_tk_font(8, "bold"), fg=COL_NAVY).pack(side="right", padx=6)
-        self.p_invoices_listbox.bind("<<ListboxSelect>>", self._update_alloc_summary)
+        self.p_invoices_tree.bind("<<TreeviewSelect>>", self._update_alloc_summary)
 
         btns = tk.Frame(form_card, bg=COL_CARD)
-        btns.pack(fill="x", padx=12, pady=(0, 14))
+        btns.pack(fill="x", padx=12, pady=(0, 8))
         self.btn_save_payment = ttk.Button(btns, text="💾 حفظ الدفعة", style="Accent.TButton", command=self.save_payment_form)
         self.btn_save_payment.pack(side="right", padx=3)
         ttk.Button(btns, text="مسح الحقول", style="Ghost.TButton", command=self.clear_payment_form).pack(side="right", padx=3)
@@ -1169,17 +1342,17 @@ class InvoiceApp(_BaseWindow):
         )
         self.p_filter_customer_combo.configure(values=["الكل"] + self.all_customer_names())
 
-        tk.Label(pf, text="إلى تاريخ:", bg=COL_CARD, fg=COL_TEXT, font=get_tk_font(10)).pack(side="right", padx=(10, 2))
-        self.p_filter_to_var = tk.StringVar()
-        self.p_filter_to_var.trace_add("write", lambda *a: self.refresh_payments_list())
-        p_to_row, _ = build_date_field(pf, self.p_filter_to_var)
-        p_to_row.pack(side="right", padx=4)
-
         tk.Label(pf, text="من تاريخ:", bg=COL_CARD, fg=COL_TEXT, font=get_tk_font(10)).pack(side="right", padx=(10, 2))
         self.p_filter_from_var = tk.StringVar()
         self.p_filter_from_var.trace_add("write", lambda *a: self.refresh_payments_list())
         p_from_row, _ = build_date_field(pf, self.p_filter_from_var)
         p_from_row.pack(side="right", padx=4)
+
+        tk.Label(pf, text="إلى تاريخ:", bg=COL_CARD, fg=COL_TEXT, font=get_tk_font(10)).pack(side="right", padx=(10, 2))
+        self.p_filter_to_var = tk.StringVar()
+        self.p_filter_to_var.trace_add("write", lambda *a: self.refresh_payments_list())
+        p_to_row, _ = build_date_field(pf, self.p_filter_to_var)
+        p_to_row.pack(side="right", padx=4)
 
         ttk.Button(pf, text="✕ مسح التصفية", style="Ghost.TButton", command=self.clear_payment_filters).pack(side="right", padx=4)
         self.payments_summary_label = tk.Label(pf, text="", bg=COL_CARD, fg=COL_NAVY, font=get_tk_font(10, "bold"))
@@ -1235,7 +1408,10 @@ class InvoiceApp(_BaseWindow):
         self.bal_tree.tag_configure("settled", foreground=COL_SUCCESS, font=get_tk_font(10, "bold"))
         self.bal_tree.tag_configure("rowodd", background=COL_CARD)
         self.bal_tree.tag_configure("roweven", background=COL_ROW_ALT)
-        self.bal_tree.pack(fill="both", expand=True, padx=6, pady=6)
+        bal_scroll = ttk.Scrollbar(bal_box, orient="vertical", command=self.bal_tree.yview)
+        self.bal_tree.configure(yscrollcommand=bal_scroll.set)
+        bal_scroll.pack(side="right", fill="y", padx=(0, 6), pady=6)
+        self.bal_tree.pack(fill="both", expand=True, padx=(6, 0), pady=6)
 
     def refresh_payments_list(self):
         query_customer = self.p_filter_customer_var.get() if hasattr(self, "p_filter_customer_var") else "الكل"
@@ -1286,7 +1462,7 @@ class InvoiceApp(_BaseWindow):
     def _get_selected_payment(self):
         sel = self.pay_tree.selection()
         if not sel:
-            messagebox.showinfo("تنبيه", "الرجاء اختيار دفعة من القائمة أولاً.")
+            messagebox.showinfo("تنبيه", "الرجاء اختيار دفعة من القائمة أولاً")
             return None
         pid = sel[0]
         for p in getattr(self, "_all_payments", []):
@@ -1299,31 +1475,59 @@ class InvoiceApp(_BaseWindow):
         self._update_payment_invoice_list()
 
     def _update_payment_invoice_list(self, preselect=None):
-        """يملأ قائمة الفواتير غير المسددة/الجزئية للعميل المحدد حالياً في نموذج الدفعة،
-        ليختار المستخدم منها الفواتير التي يريد تخصيص الدفعة لها (إن وُجدت)."""
-        self.p_invoices_listbox.delete(0, "end")
+        """يملأ جدول الفواتير غير المسددة/الجزئية للعميل المحدد حالياً في نموذج الدفعة،
+        ليختار المستخدم منه الفواتير التي يريد تخصيص الدفعة لها (إن وُجدت).
+        يُظهر كل بيانات كل فاتورة في العمود المناسب لتسهيل المقارنة والاختيار."""
+        # حفظ التحديد الحالي عند إعادة بناء الجدول (مثلاً عند فقدان التركيز
+        # على الـ Combobox بعد اختيار فاتورة) لمنع فقدان اختيار المستخدم.
+        preserve = None if preselect is not None else set(self._selected_payment_invoices())
+        self.p_invoices_tree.delete(*self.p_invoices_tree.get_children())
         self._p_invoice_choices = []
         customer_name = self.p_customer.get().strip()
         if not customer_name:
             return
-        invoices = [i for i in load_invoices() if i.get("customer") == customer_name]
-        status_map = invoice_payment_status(load_invoices(), load_payments())
+        all_invoices = load_invoices()
+        status_map = invoice_payment_status(all_invoices, load_payments())
+        invoices = [i for i in all_invoices if i.get("customer") == customer_name]
         invoices.sort(key=lambda i: str(i.get("date", "")))
-        preselect = set(str(x) for x in (preselect or []))
-        for idx, inv in enumerate(invoices):
+        preselect = set(str(x) for x in (preselect or preserve or []))
+        status_tag_map = {"paid": "st_paid", "partial": "st_partial", "unpaid": "st_unpaid"}
+        status_label_map = {"paid": "مسددة ✅", "partial": "جزئية ⏳", "unpaid": "غير مسددة ⛔"}
+        to_select = []
+        for inv in invoices:
             no = str(inv.get("invno", ""))
             st = status_map.get(no, {"total": float(inv.get("total") or 0), "balance": float(inv.get("total") or 0), "status": "unpaid"})
             if st["status"] == "paid" and no not in preselect:
                 continue  # لا داعي لعرض فواتير مسددة بالكامل ضمن خيارات التخصيص
-            label = f'{no}   |   {inv.get("date","")}   |   المتبقي: {st["balance"]:.3f} د.ك'
-            self.p_invoices_listbox.insert("end", label)
+            stripe = "roweven" if len(self._p_invoice_choices) % 2 else "rowodd"
+            status_tag = status_tag_map.get(st["status"], "st_unpaid")
+            self.p_invoices_tree.insert("", "end", iid=no, values=(
+                inv.get("invno", ""),
+                inv.get("date", ""),
+                inv.get("declno", ""),
+                inv.get("port", ""),
+                inv.get("goodstype", ""),
+                inv.get("origin", ""),
+                f'{st["total"]:.3f}',
+                f'{st["paid"]:.3f}',
+                f'{st["balance"]:.3f}',
+                status_label_map.get(st["status"], "غير مسددة ⛔"),
+            ), tags=(stripe, status_tag))
             self._p_invoice_choices.append(no)
             if no in preselect:
-                self.p_invoices_listbox.selection_set(idx)
+                to_select.append(no)
+        # Treeview.selection_set يحوّل selection set إلى "استبدال" وليس "إضافة"
+        # في كل استدعاء، لذا يجب تحديد كل الفواتير المطلوب تمييزها مرة واحدة
+        # (والترتيب يُحفظ حسب ترتيب الظهور = الأقدم أولاً = أولوية FIFO).
+        if to_select:
+            self.p_invoices_tree.selection_set(*to_select)
         self._update_alloc_summary()
 
     def _selected_payment_invoices(self):
-        return [self._p_invoice_choices[i] for i in self.p_invoices_listbox.curselection()]
+        """يعيد أرقام الفواتير المحددة في الجدول بترتيب ظهورها (الأقدم أولاً)
+        لضمان أولوية توزيع الدفعة على الفواتير المستحقة أقدماً."""
+        sel = set(self.p_invoices_tree.selection())
+        return [no for no in self._p_invoice_choices if no in sel]
 
     def _update_alloc_summary(self, event=None):
         chosen = self._selected_payment_invoices()
@@ -1370,7 +1574,7 @@ class InvoiceApp(_BaseWindow):
         self._editing_payment_id = None
         self.p_receipt_preview_var.set("رقم السند: —")
         self.btn_save_payment.config(text="حفظ الدفعة")
-        self.p_invoices_listbox.delete(0, "end")
+        self.p_invoices_tree.delete(*self.p_invoices_tree.get_children())
         self._p_invoice_choices = []
         self.p_alloc_summary_var.set("")
 
@@ -1383,11 +1587,11 @@ class InvoiceApp(_BaseWindow):
     def save_payment_form(self):
         customer = self.p_customer.get().strip()
         if not customer:
-            messagebox.showwarning("تنبيه", "الرجاء اختيار أو إدخال اسم العميل.")
+            messagebox.showwarning("تنبيه", "الرجاء اختيار أو إدخال اسم العميل")
             return
         amount_val = safe_float(self.p_amount.get())
         if amount_val <= 0:
-            messagebox.showwarning("تنبيه", "الرجاء إدخال مبلغ دفعة أكبر من صفر.")
+            messagebox.showwarning("تنبيه", "الرجاء إدخال مبلغ دفعة أكبر من صفر")
             return
         p = {
             "customer": customer,
@@ -1414,7 +1618,7 @@ class InvoiceApp(_BaseWindow):
         p = self._get_selected_payment()
         if not p:
             return
-        if messagebox.askyesno("تأكيد الحذف", "هل أنت متأكد من حذف هذه الدفعة؟\nلا يمكن التراجع عن هذا الإجراء."):
+        if messagebox.askyesno("تأكيد الحذف", "هل أنت متأكد من حذف هذه الدفعة؟\nلا يمكن التراجع عن هذا الإجراء"):
             try:
                 delete_payment(p["id"])
             except SaveError as e:
@@ -1435,9 +1639,12 @@ class InvoiceForm(tk.Toplevel):
         self.editing_invno = invoice["invno"] if invoice else None
         self.title("تعديل فاتورة" if invoice else "فاتورة جديدة")
         self.geometry("980x760")
+        self.minsize(760, 600)
         self.configure(bg=COL_BG)
         self.transient(app)
         self.grab_set()
+        self.lift()
+        self.focus_force()
 
         # ---- منطقة قابلة للتمرير ----
         container = tk.Frame(self, bg=COL_BG)
@@ -1450,10 +1657,41 @@ class InvoiceForm(tk.Toplevel):
         canvas.configure(yscrollcommand=scrollbar.set)
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
+        self._form_canvas = canvas
+        self._form_scroll_frame = self.scroll_frame
+        self._scroll_anim_id = None
 
-        def _on_mousewheel(event):
+        # ---- عجلة الفأرة: ربط متوافق مع Windows / macOS / Linux ----
+        # نربطها على النافذة (self) لا على كامل التطبيق (bind_all)، لأن
+        # وسم الربط "toplevel" هو أحد الوسوم الافتراضية لكل عنصر فرعي داخل
+        # هذه النافذة تلقائياً، فتصل الأحداث من أي حقل بداخلها دون أن يؤثر
+        # الربط على النوافذ الأخرى أو يسبب أخطاء بعد إغلاق هذه النافذة.
+        try:
+            windowing_system = self.tk.call("tk", "windowingsystem")
+        except tk.TclError:
+            windowing_system = "win32"
+
+        def _on_mousewheel_windows(event):
+            self._cancel_scroll_animation()
             canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
-        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+
+        def _on_mousewheel_mac(event):
+            self._cancel_scroll_animation()
+            canvas.yview_scroll(int(-1 * event.delta), "units")
+
+        def _on_mousewheel_linux(event):
+            self._cancel_scroll_animation()
+            canvas.yview_scroll(-1 if event.num == 4 else 1, "units")
+
+        if windowing_system == "x11":
+            # لينكس لا يرسل حدث <MouseWheel> بل أزراراً افتراضية 4/5
+            self.bind("<Button-4>", _on_mousewheel_linux)
+            self.bind("<Button-5>", _on_mousewheel_linux)
+        elif windowing_system == "aqua":
+            self.bind("<MouseWheel>", _on_mousewheel_mac)
+        else:
+            self.bind("<MouseWheel>", _on_mousewheel_windows)
+
         self.protocol("WM_DELETE_WINDOW", self._on_close)
 
         self.vars = {}
@@ -1461,11 +1699,85 @@ class InvoiceForm(tk.Toplevel):
         self._build_items_section(invoice)
         self._build_notes_and_actions(invoice)
 
+    def _bind_widget_autoscroll(self, widget):
+        widget.bind("<FocusIn>", self._on_widget_focus_in)
+
+    def _on_widget_focus_in(self, event):
+        widget = event.widget
+        self.after_idle(lambda w=widget: self._ensure_widget_visible(w))
+
+    def _ensure_widget_visible(self, widget):
+        """يمرّر تلقائياً وبحركة سلسة حتى يظهر الحقل الذي حصل على التركيز
+        كاملاً ضمن منطقة الرؤية، مع هامش مريح أعلى وأسفل"""
+        if not widget or not widget.winfo_exists():
+            return
+        canvas = getattr(self, "_form_canvas", None)
+        if canvas is None or not canvas.winfo_exists() or not canvas.winfo_ismapped():
+            return
+        try:
+            canvas.update_idletasks()
+            bbox = canvas.bbox("all")
+            if not bbox:
+                return
+            scroll_height = max(1, int(bbox[3] - bbox[1]))
+            view_height = canvas.winfo_height()
+            widget_top = widget.winfo_rooty() - canvas.winfo_rooty() + int(canvas.yview()[0] * scroll_height)
+            widget_bottom = widget_top + max(widget.winfo_reqheight(), widget.winfo_height())
+            view_top = canvas.yview()[0] * scroll_height
+            view_bottom = view_top + view_height
+            padding = 24
+
+            target = None
+            if widget_bottom > view_bottom - padding:
+                target = (widget_bottom + padding - view_height) / scroll_height
+            elif widget_top < view_top + padding:
+                target = (widget_top - padding) / scroll_height
+
+            if target is not None:
+                self._animate_scroll_to(canvas, max(0.0, min(1.0, target)))
+        except tk.TclError:
+            return
+
+    def _cancel_scroll_animation(self):
+        anim_id = getattr(self, "_scroll_anim_id", None)
+        if anim_id:
+            try:
+                self.after_cancel(anim_id)
+            except tk.TclError:
+                pass
+            self._scroll_anim_id = None
+
+    def _animate_scroll_to(self, canvas, target_fraction, duration_ms=180, steps=12):
+        """تمرير سلس (ease-out) نحو target_fraction بدلاً من القفز المباشر،
+        بحيث يشعر المستخدم بحركة طبيعية عند الانتقال بين الحقول بمفتاح Tab
+        أو عند النقر على حقل خارج نطاق الرؤية الحالي"""
+        self._cancel_scroll_animation()
+        start_fraction = canvas.yview()[0]
+        distance = target_fraction - start_fraction
+        if abs(distance) < 0.0015:
+            canvas.yview_moveto(target_fraction)
+            return
+
+        interval = max(8, duration_ms // steps)
+
+        def ease_out_cubic(t):
+            return 1 - (1 - t) ** 3
+
+        def step(i=0):
+            if not canvas.winfo_exists():
+                self._scroll_anim_id = None
+                return
+            t = min(1.0, (i + 1) / steps)
+            canvas.yview_moveto(start_fraction + distance * ease_out_cubic(t))
+            if t < 1.0:
+                self._scroll_anim_id = self.after(interval, lambda: step(i + 1))
+            else:
+                self._scroll_anim_id = None
+
+        step()
+
     def _on_close(self):
-        # لا بد من فك ربط عجلة الفأرة (bind_all) قبل إغلاق النافذة، وإلا
-        # سيبقى الربط مشيراً إلى canvas تم تدميره ويسبب خطأ عند التمرير
-        # في النافذة الرئيسية لاحقاً.
-        self.unbind_all("<MouseWheel>")
+        self._cancel_scroll_animation()
         self.destroy()
 
     def _build_meta_section(self, invoice):
@@ -1476,49 +1788,59 @@ class InvoiceForm(tk.Toplevel):
         header.pack(fill="x", padx=14, pady=(12, 8))
         tk.Label(header, text="البيانات الأساسية وتفاصيل الشحنة",
                  bg=COL_CARD, fg=COL_NAVY, font=get_tk_font(10, "bold")).pack(side="right")
-        tk.Label(header, text="أدخل البيانات الأساسية ثم عدّل بنود الخدمة والأرقام مباشرة قبل الحفظ.",
+        tk.Label(header, text="أدخل البيانات الأساسية ثم عدّل بنود الخدمة والأرقام مباشرة قبل الحفظ",
                  bg=COL_CARD, fg=COL_SUBTEXT, font=get_tk_font(8)).pack(side="right", padx=(10, 0))
 
         fields = tk.Frame(card, bg=COL_CARD)
         fields.pack(fill="x", padx=12, pady=(0, 10))
         cols_per_row = 3
-        for idx, (key, label) in enumerate(META_FIELDS):
-            r, c = divmod(idx, cols_per_row)
-            rtl_col = cols_per_row - 1 - c
-            frame = tk.Frame(fields, bg=COL_CARD)
-            frame.grid(row=r, column=rtl_col, padx=8, pady=6, sticky="ew")
-            tk.Label(frame, text=label, bg=COL_CARD, fg=COL_TEXT, font=get_tk_font(9)).pack(anchor="e")
-            var = tk.StringVar(value=(invoice.get(key, "") if invoice else self._default_for(key)))
+        field_labels = {key: label for key, label in META_FIELDS}
+        field_rows = [
+            ("invno", "date", "customer"),
+            ("declno", "decldate", "port"),
+            ("containercount", "goodstype", "origin"),
+        ]
 
-            if key == "customer":
-                entry = ttk.Combobox(
-                    frame,
-                    textvariable=var,
-                    values=self.app.all_customer_names(),
-                    font=get_tk_font(10),
-                    justify="right"
-                )
-                entry.configure(postcommand=lambda cb=entry: cb.configure(values=self.app.all_customer_names()))
-                entry.bind("<<ComboboxSelected>>", self._update_invno_for_customer)
-                entry.bind("<FocusOut>", self._update_invno_for_customer)
-                entry.pack(fill="x")
-            elif key in ("date", "decldate"):
-                date_row, entry = build_date_field(frame, var)
-                date_row.pack(fill="x")
-            else:
-                entry = tk.Entry(
-                    frame,
-                    textvariable=var,
-                    font=get_tk_font(10),
-                    justify="right"
-                )
-                entry.pack(fill="x")
+        for row_idx, row_keys in enumerate(field_rows):
+            for col_idx, key in enumerate(row_keys):
+                frame = tk.Frame(fields, bg=COL_CARD)
+                frame.grid(row=row_idx, column=col_idx, padx=8, pady=6, sticky="ew")
+                tk.Label(frame, text=field_labels[key], bg=COL_CARD, fg=COL_TEXT, font=get_tk_font(9)).pack(anchor="e")
+                var = tk.StringVar(value=(invoice.get(key, "") if invoice else self._default_for(key)))
 
-            self.vars[key] = var
+                if key == "customer":
+                    entry = ttk.Combobox(
+                        frame,
+                        textvariable=var,
+                        values=self.app.all_customer_names(),
+                        font=get_tk_font(10),
+                        justify="right",
+                        style="TCombobox"
+                    )
+                    entry.configure(postcommand=lambda cb=entry: cb.configure(values=self.app.all_customer_names()))
+                    entry.bind("<<ComboboxSelected>>", self._update_invno_for_customer)
+                    entry.bind("<FocusOut>", self._update_invno_for_customer)
+                    var.trace_add("write", lambda *a: self._update_invno_for_customer())
+                    entry.pack(fill="x")
+                elif key in ("date", "decldate"):
+                    date_row, entry = build_date_field(frame, var)
+                    date_row.pack(fill="x")
+                else:
+                    entry = ttk.Entry(
+                        frame,
+                        textvariable=var,
+                        font=get_tk_font(10),
+                        justify="right",
+                        style="Flat.TEntry"
+                    )
+                    entry.pack(fill="x")
+
+                self._bind_widget_autoscroll(entry)
+                self.vars[key] = var
         for c in range(cols_per_row):
             fields.grid_columnconfigure(c, weight=1)
 
-        tk.Label(card, text="رقم الفاتورة يتولد تلقائياً (رمز الشركة + رقم تسلسلي) بعد اختيار العميل، ويمكن تعديله يدوياً عند الحاجة.",
+        tk.Label(card, text="رقم الفاتورة يتولد تلقائياً (رمز الشركة + رقم تسلسلي) بعد اختيار العميل، ويمكن تعديله يدوياً عند الحاجة",
                  bg=COL_CARD, fg="#888", font=get_tk_font(8)).pack(anchor="e", padx=14, pady=(0, 12))
 
     def _update_invno_for_customer(self, event=None):
@@ -1546,78 +1868,128 @@ class InvoiceForm(tk.Toplevel):
         return ""
 
     def _build_items_section(self, invoice):
-        box = tk.Frame(self.scroll_frame, bg=COL_CARD, bd=1, relief="solid")
+        box = ttk.Frame(self.scroll_frame, style="Card.TFrame")
         box.pack(fill="both", expand=True, padx=10, pady=(0, 10))
 
-        header = tk.Frame(box, bg=COL_CARD)
+        header = ttk.Frame(box, style="Card.TFrame")
         header.pack(fill="x", padx=12, pady=(10, 6))
-        tk.Label(header, text="نوع الخدمة — Kind of Service",
+        tk.Label(header, text="بنود الخدمة",
                  bg=COL_CARD, fg=COL_NAVY, font=get_tk_font(10, "bold")).pack(side="right")
-        tk.Label(header, text="يمكنك تعديل أسماء البنود مباشرة قبل الحفظ.",
+        tk.Label(header, text="أدخل الأسماء ثم استخدم Tab بين دينار وفلس.",
                  bg=COL_CARD, fg=COL_SUBTEXT, font=get_tk_font(8)).pack(side="right", padx=(10, 0))
 
-        grid_header = tk.Frame(box, bg="#F8FAFC")
+        grid_header = tk.Frame(box, bg=COL_CARD_SOFT)
         grid_header.pack(fill="x", padx=10, pady=(0, 4))
-        tk.Label(grid_header, text="الخدمة", bg="#F8FAFC", font=get_tk_font(9, "bold")).pack(side="right", padx=8)
-        tk.Label(grid_header, text="دينار", bg="#F8FAFC", width=8, font=get_tk_font(9, "bold")).pack(side="left", padx=2)
-        tk.Label(grid_header, text="فلس", bg="#F8FAFC", width=8, font=get_tk_font(9, "bold")).pack(side="left", padx=2)
+        tk.Label(grid_header, text="م", bg=COL_CARD_SOFT, width=4, font=get_tk_font(9, "bold")).grid(row=0, column=0, padx=4, pady=10)
+        tk.Label(grid_header, text="الخدمة", bg=COL_CARD_SOFT, font=get_tk_font(9, "bold")).grid(row=0, column=1, padx=4, pady=10, sticky="e")
+        tk.Label(grid_header, text="دينار", bg=COL_CARD_SOFT, width=10, font=get_tk_font(9, "bold")).grid(row=0, column=2, padx=4, pady=10)
+        tk.Label(grid_header, text="فلس", bg=COL_CARD_SOFT, width=10, font=get_tk_font(9, "bold")).grid(row=0, column=3, padx=4, pady=10)
+        grid_header.grid_columnconfigure(1, weight=1)
 
         self.item_dinar_vars = []
         self.item_fils_vars = []
         self.item_label_ar_vars = []
         self.item_label_en_vars = []
+        self.item_numeric_entries = []
         existing_items = invoice.get("items") if invoice else None
 
         for idx, (ar, en) in enumerate(SERVICE_ITEMS):
-            row = tk.Frame(box, bg=COL_CARD)
-            row.pack(fill="x", padx=8, pady=2)
-            tk.Label(row, text=str(idx + 1), width=4, font=get_tk_font(9), bg=COL_CARD).pack(side="right", padx=2)
+            row = ttk.Frame(box, style="Card.TFrame")
+            row.pack(fill="x", padx=8, pady=6)
+            row.grid_columnconfigure(1, weight=1)
 
-            edit_frame = tk.Frame(row, bg=COL_CARD)
-            edit_frame.pack(side="right", fill="x", expand=True, padx=2)
+            tk.Label(row, text=str(idx + 1), width=4, font=get_tk_font(9), bg=COL_CARD).grid(row=0, column=0, padx=4, pady=2)
+
             existing_item = existing_items[idx] if existing_items and idx < len(existing_items) else {}
             ar_value = existing_item.get("label") if existing_item.get("label") not in (None, "") else ar
             en_value = existing_item.get("labelEn") if existing_item.get("labelEn") not in (None, "") else en
 
+            edit_frame = ttk.Frame(row, style="Card.Soft.TFrame")
+            edit_frame.grid(row=0, column=1, sticky="ew", padx=4, pady=2)
             ar_var = tk.StringVar(value=ar_value)
             en_var = tk.StringVar(value=en_value)
             self.item_label_ar_vars.append(ar_var)
             self.item_label_en_vars.append(en_var)
 
-            tk.Entry(edit_frame, textvariable=ar_var, width=28, font=get_tk_font(9), justify="right").pack(fill="x", pady=1)
-            tk.Entry(edit_frame, textvariable=en_var, width=28, font=("Consolas", 8), justify="left").pack(fill="x", pady=1)
+            ar_entry = ttk.Entry(edit_frame, textvariable=ar_var, font=get_tk_font(9), justify="right", style="Flat.TEntry")
+            en_entry = ttk.Entry(edit_frame, textvariable=en_var, font=("Consolas", 8), justify="left", style="Flat.TEntry")
+            ar_entry.pack(fill="x", pady=2, padx=4)
+            en_entry.pack(fill="x", pady=2, padx=4)
+            ar_entry.configure(takefocus=False)
+            en_entry.configure(takefocus=False)
+            self._bind_widget_autoscroll(ar_entry)
+            self._bind_widget_autoscroll(en_entry)
 
             dv = tk.StringVar(value=str(existing_item.get("dinar", "")) if existing_item.get("dinar") not in ("", None) else "")
-            fv = tk.StringVar(value=str(existing_item.get("fils", "")) if existing_item.get("fils") not in ("", None) else "")
+            fv = tk.StringVar(value=fmt_fils3(existing_item.get("fils", "")) if existing_item.get("fils") not in ("", None) else "")
             dv.trace_add("write", lambda *a: self._update_total())
             fv.trace_add("write", lambda *a: self._update_total())
-            tk.Entry(row, textvariable=dv, width=8, font=("Consolas", 10), justify="center").pack(side="right", padx=2)
-            tk.Entry(row, textvariable=fv, width=8, font=("Consolas", 10), justify="center").pack(side="right", padx=2)
+            dinar_entry = ttk.Entry(row, textvariable=dv, width=10, font=("Consolas", 10), justify="center", style="Flat.TEntry")
+            fils_entry = ttk.Entry(row, textvariable=fv, width=10, font=("Consolas", 10), justify="center", style="Flat.TEntry")
+            dinar_entry.grid(row=0, column=2, padx=4, pady=2)
+            fils_entry.grid(row=0, column=3, padx=4, pady=2)
+            fils_entry.bind("<FocusOut>", lambda e, var=fv: var.set(fmt_fils3(var.get())))
+            self._bind_widget_autoscroll(dinar_entry)
+            self._bind_widget_autoscroll(fils_entry)
             self.item_dinar_vars.append(dv)
             self.item_fils_vars.append(fv)
+            self.item_numeric_entries.extend([dinar_entry, fils_entry])
 
-        total_frame = tk.Frame(box, bg="#FBF6EA")
+        total_frame = ttk.Frame(box, style="Card.Soft.TFrame")
         total_frame.pack(fill="x", padx=8, pady=(8, 10))
-        tk.Label(total_frame, text="المجموع — Total", font=get_tk_font(11, "bold"), bg="#FBF6EA").pack(side="right", padx=10, pady=8)
-        self.total_label = tk.Label(total_frame, text="0.000 د.ك", font=("Consolas", 13, "bold"), bg="#FBF6EA", fg="#0F2B46")
-        self.total_label.pack(side="right", padx=10, pady=8)
+        label_wrapper = tk.Frame(total_frame, bg=COL_CARD_SOFT)
+        label_wrapper.pack(fill="x", padx=10, pady=10)
+        # Grid layout: [ English words (expands) ] [ Arabic — Total ] [ numeric total ]
+        self.total_words_var_en = tk.StringVar(value='')
+        # make column 0 expand and reserve extra minimum width to avoid wrapping
+        label_wrapper.grid_columnconfigure(0, weight=1, minsize=420)
+        label_wrapper.grid_columnconfigure(1, weight=0)
+        label_wrapper.grid_columnconfigure(2, weight=0)
+        self.total_words_label_en = tk.Label(label_wrapper, textvariable=self.total_words_var_en,
+                             font=get_tk_font(9, "italic"), bg=COL_CARD_SOFT,
+                             fg=COL_SUBTEXT, justify="left", anchor="w")
+        self.total_words_label_en.grid(row=0, column=0, sticky="w", padx=(6, 10))
+        tk.Label(label_wrapper, text="Total — المجموع", font=get_tk_font(11, "bold"), bg=COL_CARD_SOFT, fg=COL_NAVY).grid(row=0, column=1, sticky="e")
+        self.total_label = tk.Label(label_wrapper, text="0.000 د.ك", font=("Consolas", 13, "bold"), bg=COL_CARD_SOFT, fg="#0F2B46")
+        self.total_label.grid(row=0, column=2, sticky="e", padx=(10, 0))
         self._update_total()
+
+    def _focus_next_input(self, event, target):
+        if target is not None:
+            target.focus_set()
+            self.after_idle(lambda: self._ensure_widget_visible(target))
+        return "break"
+
+    def _bind_numeric_tab_order(self):
+        if not getattr(self, "item_numeric_entries", None):
+            return
+        for idx, entry in enumerate(self.item_numeric_entries):
+            next_entry = self.item_numeric_entries[idx + 1] if idx + 1 < len(self.item_numeric_entries) else getattr(self, "notes_text", None)
+            prev_entry = self.item_numeric_entries[idx - 1] if idx > 0 else self.item_numeric_entries[-1]
+            entry.bind("<Tab>", lambda e, target=next_entry: self._focus_next_input(e, target))
+            entry.bind("<Shift-Tab>", lambda e, target=prev_entry: self._focus_next_input(e, target))
 
     def _update_total(self):
         total_fils = 0
         for dv, fv in zip(self.item_dinar_vars, self.item_fils_vars):
             total_fils += safe_int(dv.get()) * 1000 + safe_int(fv.get())
-        self.total_label.config(text=f"{total_fils/1000:.3f} د.ك")
+        total_amount = total_fils / 1000
+        self.total_label.config(text=f"{total_amount:.3f} د.ك")
+        # do not display Arabic words for the amount (user requested)
+        if hasattr(self, "total_words_var_en"):
+            self.total_words_var_en.set(english_currency_words(total_amount))
 
     def _build_notes_and_actions(self, invoice):
-        box = tk.Frame(self.scroll_frame, bg=COL_CARD, highlightthickness=1, highlightbackground=COL_BORDER)
+        box = ttk.Frame(self.scroll_frame, style="Card.TFrame")
         box.pack(fill="x", padx=10, pady=(0, 10))
         tk.Label(box, text="📝 ملاحظات", bg=COL_CARD, fg=COL_NAVY, font=get_tk_font(10, "bold")).pack(anchor="e", padx=12, pady=(10, 4))
-        self.notes_text = tk.Text(box, height=3, font=get_tk_font(10), relief="solid", bd=1,
-                                   highlightthickness=1, highlightbackground=COL_BORDER)
+        self.notes_text = tk.Text(box, height=4, font=get_tk_font(10), relief="flat", bd=0,
+                                   highlightthickness=1, highlightbackground=COL_BORDER, background=COL_CARD_SOFT)
         self.notes_text.pack(fill="x", padx=12, pady=(0, 12))
+        self._bind_widget_autoscroll(self.notes_text)
         if invoice:
             self.notes_text.insert("1.0", invoice.get("notes", ""))
+        self._bind_numeric_tab_order()
 
         actions = tk.Frame(self.scroll_frame, bg=COL_BG)
         actions.pack(fill="x", padx=10, pady=(0, 16))
@@ -1625,9 +1997,17 @@ class InvoiceForm(tk.Toplevel):
         ttk.Button(actions, text="إلغاء", style="Ghost.TButton", command=self._on_close).pack(side="right", padx=4)
 
     def save(self):
+        customer = self.vars["customer"].get().strip()
+        if not customer:
+            messagebox.showwarning("تنبيه", "الرجاء إدخال اسم العميل.")
+            return
+        self._update_invno_for_customer()
         invno = self.vars["invno"].get().strip()
         if not invno:
-            messagebox.showwarning("تنبيه", "الرجاء إدخال رقم الفاتورة.")
+            messagebox.showwarning(
+                "تنبيه",
+                "الرجاء اختيار عميل صالح له رمز شركة أو إدخال رقم الفاتورة يدويًا."
+            )
             return
         # التحقق من عدم تكرار رقم الفاتورة عند الإضافة أو تغييره
         existing_numbers = [str(i["invno"]) for i in load_invoices()]
@@ -1665,14 +2045,22 @@ _LOGO_IMG_HTML_CACHE = None
 
 
 def _get_logo_img_html():
-    """يقرأ شعار الشركة من القرص مرة واحدة فقط ويخزّنه مؤقتاً (مفيد خصوصاً عند
-    إنشاء مستند يجمع عدة فواتير أو عدة كشوف حساب دفعة واحدة)."""
+    """يقرأ شعار الشركة أو أيقونة التطبيق من القرص مرة واحدة فقط ويخزّنه مؤقتاً."""
     global _LOGO_IMG_HTML_CACHE
     if _LOGO_IMG_HTML_CACHE is None:
+        image_path = None
         if os.path.exists(ICON_FILE):
-            with open(ICON_FILE, "rb") as f:
-                logo_b64 = base64.b64encode(f.read()).decode("ascii")
-            _LOGO_IMG_HTML_CACHE = f'<img src="data:image/png;base64,{logo_b64}" alt="شعار الشركة" width="92" height="92">'
+            image_path = ICON_FILE
+        elif os.path.exists(LOGO_FILE):
+            image_path = LOGO_FILE
+
+        if image_path is not None:
+            with open(image_path, "rb") as f:
+                image_b64 = base64.b64encode(f.read()).decode("ascii")
+            _LOGO_IMG_HTML_CACHE = (
+                f'<img src="data:image/png;base64,{image_b64}" '
+                f'alt="شعار الشركة" width="92" height="92">'
+            )
         else:
             _LOGO_IMG_HTML_CACHE = ""
     return _LOGO_IMG_HTML_CACHE
@@ -1685,10 +2073,12 @@ def _safe_filename_part(v):
 
 def _build_invoice_page_html(inv, logo_img_html):
     """يبني كتلة HTML لصفحة فاتورة واحدة فقط (بدون <html>/<head>/<body> وبدون زر
-    الطباعة)، لتُستخدم سواء لطباعة فاتورة واحدة أو ضمن دفعة من عدة فواتير."""
+    الطباعة)، لتُستخدم سواء لطباعة فاتورة واحدة أو ضمن دفعة من عدة فواتير"""
     total = float(inv.get("total") or 0)
     total_d = int(total)
     total_f = round((total - total_d) * 1000)
+    total_words = arabic_currency_words(total)
+    total_words_en = english_currency_words(total)
 
     def esc(v):
         return html_module.escape(str(v)) if v not in (None, "") else "—"
@@ -1701,7 +2091,7 @@ def _build_invoice_page_html(inv, logo_img_html):
           <td class="c">{idx+1}</td>
           <td><div class="svc-cell"><span class="svc-en">{esc(it['labelEn'])}</span><span class="svc-ar">{esc(it['label'])}</span></div></td>
           <td class="c">{it['dinar'] if it['dinar'] not in ('', None) else '—'}</td>
-          <td class="c">{it['fils'] if it['fils'] not in ('', None) else '—'}</td>
+          <td class="c">{fmt_fils3(it['fils']) if it['fils'] not in ('', None) else '—'}</td>
         </tr>"""
 
     meta_html = ""
@@ -1741,8 +2131,8 @@ def _build_invoice_page_html(inv, logo_img_html):
       <th style="width:60px;">فلس</th>
     </tr></thead>
     <tbody>{rows_html}</tbody>
-    <tfoot><tr class="total-row"><td colspan="2">المجموع — Total</td><td class="c">{total_d}</td><td class="c">{total_f}</td></tr></tfoot>
-  </table>
+        <tfoot><tr class="total-row"><td>المجموع — Total</td><td class="eng">{html_module.escape(total_words_en)}</td><td class="c">{total_d}</td><td class="c">{total_f:03d}</td></tr></tfoot>
+    </table>
   {'<div style="margin-top:10px;font-size:11px;"><b>ملاحظات:</b> ' + esc(inv.get('notes','')) + '</div>' if inv.get('notes') else ''}
   <div class="sign"><div>المحاسب</div><div>المستلم</div></div>
   <div class="footer">
@@ -1782,6 +2172,7 @@ _INVOICE_PRINT_STYLE = """
   .svc-en{direction:ltr;text-align:left;color:#333;font-size:11px;flex:1 1 0;}
   .svc-ar{direction:rtl;text-align:right;font-size:12.5px;flex:1 1 0;}
   .total-row td{font-weight:bold;background:#FBF6EA;border-top:2px solid #C99A3D;}
+    td.eng{text-align:left;padding-left:10px;font-size:12px;color:#333;direction:ltr}
   .sign{display:flex;justify-content:space-between;margin-top:5px;font-size:13px;font-weight:bold;}
   .sign div{border-top:1px solid #999;padding-top:6px;width:150px;text-align:center;}
   .footer{margin-top:18px;text-align:center;font-size:10px;color:#777;border-top:1px solid #ddd;padding-top:4px;line-height:1.6;}
@@ -1795,14 +2186,14 @@ _INVOICE_PRINT_STYLE = """
 
 
 def generate_and_open_print(inv):
-    """يطبع فاتورة واحدة (يستخدم دالة الدفعة أدناه بقائمة من عنصر واحد)."""
+    """يطبع فاتورة واحدة (يستخدم دالة الدفعة أدناه بقائمة من عنصر واحد)"""
     generate_and_open_invoices_print([inv])
 
 
 def generate_and_open_invoices_print(invoices):
     """يفتح فاتورة واحدة أو عدة فواتير مختارة دفعة واحدة في مستند HTML واحد قابل
     للطباعة، بحيث تكون كل فاتورة في صفحتها الخاصة (فاصل صفحة تلقائي بينها عند
-    الطباعة الورقية) مع زر طباعة واحد يطبع الجميع دفعة واحدة."""
+    الطباعة الورقية) مع زر طباعة واحد يطبع الجميع دفعة واحدة"""
     if not invoices:
         return
     logo_img_html = _get_logo_img_html()
@@ -1835,7 +2226,7 @@ def generate_and_open_invoices_print(invoices):
 
 def _build_statement_page_html(customer, date_from, date_to, invoices, payments, logo_img_html):
     """يبني كتلة HTML لكشف حساب عميل واحد فقط (بدون <html>/<head>/<body> وبدون
-    زر الطباعة)، لتُستخدم سواء لكشف عميل واحد أو ضمن دفعة من عدة عملاء."""
+    زر الطباعة)، لتُستخدم سواء لكشف عميل واحد أو ضمن دفعة من عدة عملاء"""
 
     def esc(v):
         return html_module.escape(str(v)) if v not in (None, "") else "—"
@@ -1854,7 +2245,7 @@ def _build_statement_page_html(customer, date_from, date_to, invoices, payments,
         st = status_map.get(invno, {}).get("status", "unpaid")
         txns.append({
             "date": str(inv.get("date", "")),
-            "desc": f"فاتورة رقم {inv.get('invno', '')}",
+            "desc": "فاتورة",
             "doc": invno,
             "declno": str(inv.get("declno", "") or ""),
             "debit": float(inv.get("total") or 0),
@@ -1864,11 +2255,9 @@ def _build_statement_page_html(customer, date_from, date_to, invoices, payments,
             "sort_key": (str(inv.get("date", "")), 0, invno),
         })
     for p in payments:
-        notes = (p.get("notes") or "").strip()
-        desc = "سند قبض" + (f" — {notes}" if notes else "")
         txns.append({
             "date": str(p.get("date", "")),
-            "desc": desc,
+            "desc": "سند قبض",
             "doc": str(p.get("id", "")),
             "declno": "",
             "debit": 0.0,
@@ -1926,6 +2315,7 @@ def _build_statement_page_html(customer, date_from, date_to, invoices, payments,
         </tr>"""
 
     final_balance = running
+    final_balance_words_en = english_currency_words(abs(final_balance))
 
     if date_from or date_to:
         period_txt = f"من {esc(date_from) if date_from else '—'} إلى {esc(date_to) if date_to else '—'}"
@@ -1956,7 +2346,7 @@ def _build_statement_page_html(customer, date_from, date_to, invoices, payments,
   <table>
     <thead><tr>
       <th>التاريخ</th>
-      <th>البيان</th>
+      <th>نوع البيان</th>
       <th>رقم المستند</th>
       <th>رقم البيان الجمركي</th>
       <th>مدين</th>
@@ -1970,6 +2360,7 @@ def _build_statement_page_html(customer, date_from, date_to, invoices, payments,
     <div><span>إجمالي الفواتير (مدين):</span><span>{total_debit:.3f} د.ك</span></div>
     <div><span>إجمالي المدفوعات (دائن):</span><span>{total_credit:.3f} د.ك</span></div>
     <div class="final"><span>الرصيد النهائي ({balance_word}):</span><span>{abs(final_balance):.3f} د.ك</span></div>
+    <div class="final-words"><span>Amount in English:</span><span>{html_module.escape(final_balance_words_en)}</span></div>
   </div>
   <div class="footer">
     الكويت، حولي، شارع ابن خلدون، قطعة (2) مجمع محمود حمد الملا، الدور الثالث، مكتب رقم (11)<br>
@@ -2003,6 +2394,8 @@ _STATEMENT_PRINT_STYLE = """
   .summary{margin-top:14px;font-size:13px;background:#F5F8FA;border:1px solid #E7EDF3;border-radius:8px;padding:10px 14px;display:inline-block;min-width:280px;float:left;}
   .summary div{display:flex;justify-content:space-between;padding:3px 0;}
   .summary .final{font-weight:bold;color:#0F2B46;border-top:1px solid #C99A3D;margin-top:4px;padding-top:6px;font-size:14px;}
+  .summary-words{margin-top:8px;font-size:12px;color:#333;display:flex;justify-content:space-between;gap:10px;}
+  .summary-words span{display:inline-block;}
   .footer{clear:both;margin-top:18px;text-align:center;font-size:10px;color:#777;border-top:1px solid #ddd;padding-top:4px;line-height:1.6;}
   .print-btn{background:#0F2B46;color:#fff;border:none;border-radius:8px;padding:11px 30px;font-size:14px;font-weight:bold;font-family:inherit;cursor:pointer;box-shadow:0 2px 6px rgba(15,43,70,.25);}
   .print-btn:hover{background:#081726;}
@@ -2024,7 +2417,7 @@ def generate_and_open_statement(customer, date_from, date_to, invoices, payments
 def generate_and_open_statements_print(items):
     """يفتح كشف حساب عميل واحد أو عدة عملاء مختارين دفعة واحدة في مستند HTML
     واحد قابل للطباعة، بحيث يكون كل عميل في صفحته الخاصة (فاصل صفحة تلقائي
-    بينها عند الطباعة الورقية) مع زر طباعة واحد يطبع كشوف الجميع دفعة واحدة."""
+    بينها عند الطباعة الورقية) مع زر طباعة واحد يطبع كشوف الجميع دفعة واحدة"""
     if not items:
         return
     logo_img_html = _get_logo_img_html()
