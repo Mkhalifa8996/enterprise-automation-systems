@@ -1,44 +1,46 @@
-# إعداد المزامنة السحابية مع Firebase
+# Firebase Cloud Sync Setup
 
-البرنامج **لا يحتوي على أي بيانات Firebase**. كل مستخدم يدخل بيانات مشروعه
-الخاص، ولا تُشارك هذه البيانات مع أحد.
+The application **contains no Firebase data**. Every user enters their own
+project details, and those credentials are never shared with anyone.
 
-## أين تُحفظ بياناتك؟
+## Where are your credentials stored?
 
-عند أول تشغيل تظهر نافذة **«إعداد مزامنة Firebase»**. تُحفظ ما تُدخله في ملف
-`firebase_sync_config.json` **بجانب البرنامج على جهازك أنت**، وهو مستبعَد من Git.
+On first launch a **"Firebase sync setup"** window appears. What you enter is
+saved to `firebase_sync_config.json` **next to the program on your own
+machine**, and that file is excluded from Git.
 
-لحذفها نهائياً: احذف الملف ثم أعد تشغيل البرنامج.
+To erase them permanently: delete the file and restart the program.
 
 ---
 
-## أولاً: أنشئ مشروع Firebase خاصاً بك
+## Step 1: Create your own Firebase project
 
-1. افتح [Firebase Console](https://console.firebase.google.com) وأنشئ مشروعاً
-   جديداً باسمك.
-2. من **Build → Realtime Database** أنشئ قاعدة بيانات.
-3. انسخ **رابط القاعدة** — يبدو هكذا:
+1. Open the [Firebase Console](https://console.firebase.google.com) and create
+   a new project.
+2. Under **Build → Realtime Database**, create a database.
+3. Copy the **database URL** — it looks like this:
 
    ```
    https://MY-PROJECT-default-rtdb.europe-west1.firebasedatabase.app
    ```
 
-## ثانياً: فعّل تسجيل الدخول
+## Step 2: Enable a sign-in method
 
-من **Build → Authentication → Sign-in method** فعّل أحد الخيارين:
+Under **Build → Authentication → Sign-in method**, enable one of:
 
-- **Email/Password** — الأبسط، وهو الافتراضي في نافذة الإعداد.
-- **Phone** — متاح من زر «تسجيل برقم الهاتف» داخل النافذة نفسها.
+- **Email/Password** — simplest, and the default in the setup window.
+- **Phone** — available from the "Sign in with phone number" button in the
+  same window.
 
-أضف مستخدماً من **Authentication → Users** إن اخترت Email/Password.
+If you choose Email/Password, add a user under **Authentication → Users**.
 
-## ثالثاً: انسخ Web API Key
+## Step 3: Copy your Web API Key
 
-من **Project settings (⚙) → General → Your apps → Web API Key** انسخ المفتاح.
+From **Project settings (⚙) → General → Your apps → Web API Key**, copy the key.
 
-## رابعاً: اضبط قواعد قاعدة البيانات
+## Step 4: Set the database rules
 
-في **Realtime Database → Rules** الصق:
+In **Realtime Database → Rules**, paste:
 
 ```json
 {
@@ -51,26 +53,26 @@
 }
 ```
 
-> بدون هذه القواعد سيفشل المزامنة بخطأ `Permission denied`.
+> Without these rules, sync fails with a `Permission denied` error.
 
-## خامساً: أدخل بياناتك في البرنامج
+## Step 5: Enter your details in the application
 
-اضغط **حفظ ومزامنة** بعد إدخال:
+Press **Save and sync** after filling in:
 
-| الحقل | القيمة |
+| Field | Value |
 |---|---|
-| رابط Firebase Realtime Database | الرابط المنسوخ في الخطوة الأولى |
-| Web API Key | المفتاح المنسوخ في الخطوة الثالثة |
-| البريد الإلكتروني | مستخدم Firebase الذي أنشأته |
-| كلمة مرور Firebase | كلمة مرور ذلك المستخدم |
+| Firebase Realtime Database URL | The URL copied in step 1 |
+| Web API Key | The key copied in step 3 |
+| Email address | The Firebase user you created |
+| Firebase password | That user's password |
 
-تُحفظ محلياً وتُستخدم في كل تشغيل تالٍ.
+These are stored locally and reused on every subsequent run.
 
 ---
 
-## خيار بديل: الإعداد عبر ملف `.env` (بدون واجهة)
+## Alternative: configure through a `.env` file
 
-انسخ `.env.example` إلى `.env` ثم املأ:
+Copy `.env.example` to `.env` and fill in:
 
 ```
 FIREBASE_API_KEY=...
@@ -79,16 +81,16 @@ FIREBASE_PASSWORD=...
 FIREBASE_DATABASE_URL=https://MY-PROJECT-default-rtdb.europe-west1.firebasedatabase.app
 ```
 
-يُقرأ ملف `.env` تلقائياً عند التشغيل.
+The `.env` file is read automatically at startup.
 
 ---
 
-## أخطاء شائعة
+## Common errors
 
-| الخطأ | السبب |
+| Error | Cause |
 |---|---|
-| `Permission denied` | قواعد قاعدة البيانات غير مضبوطة (راجع الخطوة الرابعة) |
-| `400 Invalid API key` | Web API Key غير صحيح أو نُسخ من المكان الخطأ |
-| `EMAIL_NOT_FOUND` | المستخدم غير موجود في Authentication → Users |
-| `INVALID_LOGIN_CREDENTIALS` | البريد أو كلمة المرور غير صحيحة |
-| فشل الاتصال | رابط القاعدة ناقص أو لا ينتهي بـ `firebasedatabase.app` |
+| `Permission denied` | Database rules are not set (see step 4) |
+| `400 Invalid API key` | The Web API Key is wrong, or copied from the wrong screen |
+| `EMAIL_NOT_FOUND` | The user does not exist under Authentication → Users |
+| `INVALID_LOGIN_CREDENTIALS` | Email or password is incorrect |
+| Connection failed | The database URL is incomplete, or does not end in `firebasedatabase.app` |

@@ -1,146 +1,154 @@
-# نظام إدارة شركة النقل
+# Transport Management System
 
-نظام سطح مكتب لإدارة شركة نقل: الرحلات اليومية، السائقون والسيارات،
-الفواتير والمدفوعات، الرواتب، الشركاء، والتقارير المالية.
+A Windows desktop application for running a transport company: daily trips,
+drivers and vehicles, invoices and payments, salaries, partners, and financial
+reports.
 
-يعمل على Windows بواجهة Tkinter، ويحفظ بياناته محلياً في SQLite مع إمكانية
-المزامنة السحابية إلى Firebase أو Google Sheets.
+Built with Tkinter, storing data locally in SQLite, with optional cloud sync to
+Firebase or Google Sheets.
 
 ---
 
-## التشغيل السريع
+## Quick start
 
 ```bat
 :: installs dependencies if needed, then runs
 run_app.bat
 ```
 
-أو مباشرةً من بايثون:
+Or run it directly with Python:
 
 ```bash
 pip install -r requirements.txt
 python main.py
 ```
 
-## بناء الملف التنفيذي
+## Build the executable
 
 ```bat
 build_exe.bat
 ```
 
-يُخرج `dist\TransportApp.exe` — ملف واحد يعمل على أي جهاز دون تثبيت بايثون.
+Produces `dist\TransportApp.exe` — a single file that runs on any Windows
+machine without installing Python.
 
 ---
 
-## بنية المشروع
+## Project structure
 
-المشروع مقسّم إلى حزمة `transport/` بدل ملف واحد ضخم، فكل جزء في مكانه:
+The project is split into a `transport/` package instead of one very large
+file, so each concern lives in its own module.
 
-### طبقة التطبيق (`transport/app_*.py`)
+### Application layer (`transport/app_*.py`)
 
-| الملف | المسؤولية | الأسطر |
+| File | Responsibility | Lines |
 |---|---|---|
-| `app.py` | يجمع الطبقات في صنف `TransportApp` | ~30 |
-| `launcher.py` | التشغيل ومنع فتح نسختين معاً | ~45 |
-| `app_core.py` | التهيئة، المزامنة السحابية، التنقّل، الشاشة الرئيسية | ~1770 |
-| `app_entities.py` | تبويبات البيانات الأساسية والفواتير والمدفوعات | ~1630 |
-| `app_salaries.py` | تبويب الرواتب وحاسبة الراتب | ~1915 |
-| `app_partners.py` | الشركاء وحسابات السائقين | ~1216 |
-| `app_reports.py` | تبويب التقارير وكل تقاريره | ~2326 |
+| `app.py` | Composes the layers into the `TransportApp` class | 19 |
+| `launcher.py` | Startup and single-instance enforcement | 27 |
+| `app_core.py` | Setup, cloud sync, navigation, home screen | 1642 |
+| `app_entities.py` | Master-data tabs, invoices, payments | 1520 |
+| `app_salaries.py` | Salary tab and the salary calculator | 1824 |
+| `app_partners.py` | Partners and driver accounts | 1145 |
+| `app_reports.py` | Reports tab and every report it produces | 2219 |
 
-`TransportApp` صنف واحد ضخم في الأصل (**218 دالة، 8763 سطراً**). فُصل إلى
-خمس طبقات (mixins) يجمعها `app.py`، فصار تعديل تقرير لا يستدعي تحميل
-شاشة الرواتب.
+`TransportApp` was originally a single class with **218 methods in 8,763
+lines**. It is now five mixin modules assembled by `app.py`, so editing a report
+no longer pulls in the salary screen.
 
-### طبقة الواجهة
+### UI layer
 
-| الملف | المسؤولية |
+| File | Responsibility |
 |---|---|
-| `app_config.py` | الألوان والخطوط والمسارات وفئات التقارير |
-| `ui_helpers.py` | دوال مساعدة وسجل الأخطاء |
-| `ui_widgets.py` | بطاقات وحقول وأزرار وتمرير |
-| `ui_text_edit.py` | نسخ/قص/لصق داخل الحقول |
-| `ui_dialogs.py` | التقويم وإدارة المرفقات |
-| `ui_crud_tab.py` | إطار CRUD عام للإدخال والجداول |
-| `ui_pages_*.py` | شاشات الرحلات والمصروفات والإيراد |
-| `ui_sidebar.py` / `ui_login.py` | شريط التنقّل ونافذة الدخول |
+| `app_config.py` | Colours, fonts, paths, report categories |
+| `ui_helpers.py` | Small shared helpers and the error log |
+| `ui_widgets.py` | Cards, entries, buttons, scrolling |
+| `ui_text_edit.py` | Copy/cut/paste inside entry fields |
+| `ui_dialogs.py` | Date picker and attachment manager |
+| `ui_crud_tab.py` | Reusable CRUD frame (form + table + search) |
+| `ui_pages_*.py` | Trips, expenses and revenue screens |
+| `ui_sidebar.py` / `ui_login.py` | Navigation bar and sign-in window |
 
-### طبقة الطباعة (`transport/print_*.py`)
+### Print layer (`transport/print_*.py`)
 
-`print_theme.py` (هوية الطباعة وA4) · `print_letterhead.py` (ترويسة الشركة) ·
-`print_invoice.py` (الفاتورة) · `print_statement.py` (كشوف الحساب).
+`print_theme.py` (shared print identity and A4 layout) ·
+`print_letterhead.py` (company letterhead) · `print_invoice.py` (invoices) ·
+`print_statement.py` (customer statements).
 
-### طبقة البيانات (`transport/data/`)
+### Data layer (`transport/data/`)
 
-| الملف | المسؤولية |
+| File | Responsibility |
 |---|---|
-| `paths.py` | مسارات التطبيق ومعلومات الشركة |
-| `schema.py` | تعريف الأعمدة وقوائم الاختيار |
-| `core.py` | الاتصال بقاعدة البيانات، الذاكرة المؤقتة، عمليات الصف |
-| `users.py` / `audit.py` | المستخدمون والصلاحيات وسجل التدقيق |
-| `entities.py` | السائقون والسيارات والعملاء وأماكن التحميل |
-| `trips.py` | الرحلات والخدمات والمصروفات اليومية |
-| `finance.py` | الفواتير والمدفوعات والصيانة والوقود |
-| `reports.py` | الحسابات والتقارير المالية وحساب الرواتب |
-| `attachments.py` | المرفقات ومواقع التحميل والتنزيل |
-| `backup.py` / `sync.py` | النسخ الاحتياطي والمزامنة السحابية |
+| `paths.py` | Application paths and company details |
+| `schema.py` | Column definitions and option lists |
+| `core.py` | Database connection, caching, row operations |
+| `users.py` / `audit.py` | Users, permissions, audit log |
+| `entities.py` | Drivers, vehicles, customers, places |
+| `trips.py` | Trips, services, daily expenses |
+| `finance.py` | Invoices, payments, maintenance, fuel |
+| `reports.py` | Financial calculations, reports, salary maths |
+| `attachments.py` | Attachments and loading/unloading locations |
+| `backup.py` / `sync.py` | Backups and cloud synchronisation |
 
-`transport/data/__init__.py` يعيد تصدير كل الأسماء، فبقية البرنامج تكتب
-`from . import data as td` كما كانت سابقاً بلا أي تغيير في منطق العمل.
+`transport/data/__init__.py` re-exports every name, so the rest of the code
+still writes `from . import data as td` exactly as before — no change to any
+business logic.
 
 ---
 
-## الأوامر
+## Commands
 
-| الأمر | الوظيفة |
+| Command | Purpose |
 |---|---|
-| `python main.py` | تشغيل البرنامج |
-| `python -m transport` | نفس الأمر أعلاه |
-| `python _smoke_test.py` | اختبار شامل: يفتح النافذة ويزور كل الشاشات |
-| `python _verify_split.py` | يتحقق أن كل دالة من الملف الأصلي موجودة |
-| `build_exe.bat` | بناء `TransportApp.exe` |
+| `python main.py` | Run the application |
+| `python -m transport` | Same as above |
+| `python _smoke_test.py` | Full test: opens the window and visits every screen |
+| `python _verify_split.py` | Confirms every method survived the module split |
+| `build_exe.bat` | Build `TransportApp.exe` |
 
 ---
 
-## الإعداد الخاص بجهازك
+## Per-machine setup
 
-الشيفرة خالية من أي بيانات خاصة: لا اسم شركة ولا عنوان ولا هاتف ولا بريد،
-ولا أي معرّف مشروع Firebase. كل مستخدم يُدخل بياناته هو.
+The source contains no private data: no company name, address, phone number,
+email address, or Firebase project ID. Each user supplies their own.
 
-انسخ `.env.example` إلى `.env` واملأ ما تحتاج:
+Copy `.env.example` to `.env` and fill in what you need:
 
 ```
-TRANSPORT_COMPANY_NAME_AR / _EN      اسم الشركة (ترويسة الفواتير)
-TRANSPORT_COMPANY_ADDRESS_AR / _EN   عنوانها
-TRANSPORT_COMPANY_PHONE / _EMAIL     الهاتف والبريد
-FIREBASE_API_KEY / _DATABASE_URL …   إعدادات المزامنة السحابية
+TRANSPORT_COMPANY_NAME_AR / _EN      Company name (invoice letterhead)
+TRANSPORT_COMPANY_ADDRESS_AR / _EN   Address
+TRANSPORT_COMPANY_PHONE / _EMAIL     Phone and email
+FIREBASE_API_KEY / _DATABASE_URL …   Cloud sync settings
 ```
 
-بدون هذه القيم يعمل البرنامج كاملاً، لكنه يطبع مستندات بلا ترويسة شركة.
+Without these values the application runs normally, but printed documents have
+no company letterhead.
 
-## المزامنة السحابية مع Firebase (اختياري)
+## Firebase cloud sync (optional)
 
-**المزامنة تعمل، وتحتاج بيانات مشروعك أنت.** لا يوجد أي مشروع مسبق في الشيفرة.
+**Sync works, and it needs your own Firebase project.** No project is baked
+into the source.
 
-عند التشغيل الأول تظهر نافذة **«إعداد مزامنة Firebase»** تطلب منها:
+On first launch a **"Firebase sync setup"** window asks for:
 
-- رابط Realtime Database
+- Realtime Database URL
 - Web API Key
-- البريد الإلكتروني
-- كلمة المرور
+- Email address
+- Password
 
-تُحفظ في `firebase_sync_config.json` **بجانب البرنامج على جهازك** (مستبعَد من
-Git)، وتُستخدم في كل تشغيل تالٍ. لحذفها: احذف الملف وأعد التشغيل.
+These are saved to `firebase_sync_config.json` **next to the program on your
+own machine** (gitignored) and reused on every subsequent run. To remove them:
+delete that file and restart.
 
-التفاصيل الكاملة وخطوات إنشاء المشروع في [FIREBASE_SETUP.md](FIREBASE_SETUP.md).
+Full steps for creating a project are in [FIREBASE_SETUP.md](FIREBASE_SETUP.md).
 
-## الملفات التي لا تُرفع إلى Git
+## Files not committed to Git
 
-| الملف | السبب |
+| File | Reason |
 |---|---|
-| `transport_data.db` · `*.xlsx` | بيانات الشركة الفعلية |
-| `backups/` · `attachments/` · `report_screenshots/` | نسخ ومرفقات محلية |
-| `firebase_sync_config.json` | **بيانات Firebase الخاصة بالمستخدم** |
-| `.env` | نفس الغرض، بصيغة متغيّرات بيئة |
-| `.firebaserc` | معرّف مشروع Firebase للمستخدم |
-| `build/` · `dist/` | مخرجات البناء |
+| `transport_data.db` · `*.xlsx` | Actual company records |
+| `backups/` · `attachments/` · `report_screenshots/` | Local backups and files |
+| `firebase_sync_config.json` | **The user's own Firebase credentials** |
+| `.env` | Same purpose, expressed as environment variables |
+| `.firebaserc` | The user's Firebase project ID |
+| `build/` · `dist/` | Build output |

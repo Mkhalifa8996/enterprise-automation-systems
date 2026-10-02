@@ -1,17 +1,18 @@
 # Enterprise Automation Systems
 
-مستودع يحتوي على مشروعين مستقلين:
+A repository containing two independent projects:
 
-| المجلد | المشروع | الوصف |
+| Folder | Project | Description |
 |---|---|---|
-| [`TransportSystem/`](TransportSystem/) | نظام إدارة شركة النقل | تطبيق سطح مكتب لإدارة الرحلات والسائقين والفواتير والرواتب والتقارير |
-| [`AlEstidamaInvoices/`](AlEstidamaInvoices/) | نظام الفواتير | نظام فواتير يعمل على ملف Excel |
+| [`TransportSystem/`](TransportSystem/) | Transport Management System | Desktop app for trips, drivers, invoices, salaries and financial reports |
+| [`AlEstidamaInvoices/`](AlEstidamaInvoices/) | Invoice System | Standalone invoice app backed by an Excel workbook |
 
-كل مشروع مستقل تماماً: له ملفات تشغيله ومتطلباته ودليله.
+Each project is fully self-contained: it has its own entry point, requirements
+and documentation.
 
 ---
 
-## نظام إدارة شركة النقل
+## Transport Management System
 
 ```bash
 cd TransportSystem
@@ -19,23 +20,24 @@ pip install -r requirements.txt
 python main.py
 ```
 
-التفاصيل الكاملة في [`TransportSystem/README.md`](TransportSystem/README.md).
+Full documentation: [`TransportSystem/README.md`](TransportSystem/README.md).
 
-بنية المشروع مقسّمة إلى حزمة `transport/` بدل ملف واحد ضخم:
+The project is organised as a `transport/` package rather than one large file:
 
-- `transport/app_*.py` — التطبيق مقسّم إلى طبقات (مزج بين الشاشات)
-- `transport/ui_*.py` — عناصر الواجهة وشاشات الإدخال
-- `transport/print_*.py` — الطباعة والفواتير والترويسة
-- `transport/data/*.py` — طبقة قاعدة البيانات
+- `transport/app_*.py` — application layers (screen mixins)
+- `transport/ui_*.py` — shared widgets and data-entry screens
+- `transport/print_*.py` — printing, invoices and letterhead
+- `transport/data/*.py` — database layer
 
-**لا يحتوي المشروع على أي بيانات خاصة.** كل مستخدم يُدخل بيانات شركته ومشروع
-Firebase الخاص به. التفاصيل في [FIREBASE_SETUP.md](TransportSystem/FIREBASE_SETUP.md).
+**The source contains no private data.** Every user supplies their own company
+details and Firebase project. See [FIREBASE_SETUP.md](TransportSystem/FIREBASE_SETUP.md).
 
-للبناء كملف تنفيذي: `TransportSystem\build_exe.bat` ← ينتج `TransportApp.exe`.
+To build a standalone executable, run `TransportSystem\build_exe.bat`, which
+produces `TransportApp.exe`.
 
 ---
 
-## نظام الفواتير
+## Invoice System
 
 ```bash
 cd AlEstidamaInvoices
@@ -44,8 +46,8 @@ python invoice_desktop_app.py
 
 ---
 
-## ملاحظات
+## Notes
 
-- [.gitignore](.gitignore) يستثني قواعد البيانات وتصديرات Excel والمرفقات
-  وأي ملفات بيانات أو أسرار.
-- [.gitattributes](.gitattributes) يوحّد نهايات الأسطر بين الأنظمة.
+- [.gitignore](.gitignore) excludes databases, Excel exports, attachments and
+  any file holding business data or secrets.
+- [.gitattributes](.gitattributes) normalises line endings across platforms.
