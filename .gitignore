@@ -1,20 +1,45 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Virtual environments
-.venv/
-venv/
-ENV/
-
-# PyInstaller
-build/
-dist/
-*.spec
-
-# Editor files
+# ===== Tooling / editor config (personal, not part of the project) =====
+.claude/
 .vscode/
+.idea/
 *.swp
 *.swo
 *~
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+ENV/
+.pytest_cache/
+
+# ===== Build output =====
+build/
+dist/
+*.log
+*.tmp
+
+# ===== Runtime data — never commit real company records =====
+# The SQLite database and its Excel exports hold live business data.
+transport_data.db
+*.xlsx
+!AlEstidamaInvoices/data.xlsx
+app_errors.log
+app_errors.log.1
+backups/
+attachments/
+report_screenshots/
+TransportSystem/mobile/firebase-config.js
+
+# ===== Secrets and per-account config — never commit =====
+# Firebase credentials, sync session, and company contact details live here.
+# Copy .env.example to .env and fill it in locally.
+.env
+firebase_sync_config.json
+google_sync_config.json
+.firebaserc
+firebase.json
+firebase_database.rules.json

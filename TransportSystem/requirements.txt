@@ -1,0 +1,7 @@
+# متطلبات تشغيل نظام إدارة شركة النقل
+# ثبّتها بالأمر:  pip install -r requirements.txt
+
+openpyxl>=3.1        # قراءة وكتابة ملفات Excel
+python-dotenv>=1.0   # تحميل إعدادات Firebase من ملف .env
+Pillow>=10.0         # لقطات شاشة التقارير (اختياري للتشغيل)
+pyinstaller>=6.0     # لبناء الملف التنفيذي TransportApp.exe
