@@ -2,7 +2,7 @@
 """كل الحسابات والتقارير المالية وتوزيع الأرباح وحساب الرواتب."""
 
 import json
-from datetime import datetime
+from datetime import date, datetime
 from .schema import FIXED_PLUS_REVENUE_DRIVERS, REVENUE_AFTER_DIESEL_DRIVERS, REVENUE_SALARY_TYPE, SALARY_METHOD_DESCRIPTIONS, SALARY_METHOD_LABELS, SALARY_REVENUE_FRACTIONS, _normalized_driver_name, partner_share_percentage, safe_float
 
 def driver_salary_for_car_period(car_no, date_from="", date_to=""):

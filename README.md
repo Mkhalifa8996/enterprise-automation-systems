@@ -29,6 +29,18 @@ The project is organised as a `transport/` package rather than one large file:
 - `transport/print_*.py` — printing, invoices and letterhead
 - `transport/data/*.py` — database layer
 
+### Screens
+
+| Home | Daily trips |
+|---|---|
+| ![Home](TransportSystem/docs/screenshots/home.png) | ![Trips](TransportSystem/docs/screenshots/trips.png) |
+
+| Reports | Invoices |
+|---|---|
+| ![Reports](TransportSystem/docs/screenshots/reports.png) | ![Invoices](TransportSystem/docs/screenshots/invoices.png) |
+
+All nine screens are in [`TransportSystem/README.md`](TransportSystem/README.md#screenshots).
+
 **The source contains no private data.** Every user supplies their own company
 details and Firebase project. See [FIREBASE_SETUP.md](TransportSystem/FIREBASE_SETUP.md).
 

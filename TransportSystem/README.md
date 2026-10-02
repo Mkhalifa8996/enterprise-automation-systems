@@ -9,6 +9,60 @@ Firebase or Google Sheets.
 
 ---
 
+## Screenshots
+
+All nine screens, captured from the running application with demo data.
+
+### Home — dashboard
+
+![Home dashboard](docs/screenshots/home.png)
+
+### Daily trips
+
+![Daily trips](docs/screenshots/trips.png)
+
+### Daily cars
+
+![Daily cars](docs/screenshots/daily_cars.png)
+
+### Master data
+
+![Master data](docs/screenshots/entities.png)
+
+### Vehicle revenue
+
+![Vehicle revenue](docs/screenshots/revenue.png)
+
+### Invoices
+
+![Invoices](docs/screenshots/invoices.png)
+
+### Salaries
+
+![Salaries](docs/screenshots/salaries.png)
+
+### Partners and driver accounts
+
+![Partners](docs/screenshots/partners.png)
+
+### Reports
+
+![Reports](docs/screenshots/reports.png)
+
+> The screenshots show the interface in Arabic, which is the application's
+> working language.
+
+To regenerate them after changing the UI:
+
+```bash
+python _capture_screenshots.py
+```
+
+This seeds demo data into a throwaway database, walks each tab and writes the
+images to `docs/screenshots/`. Your real database is never touched.
+
+---
+
 ## Quick start
 
 ```bat
@@ -103,6 +157,7 @@ business logic.
 | `python -m transport` | Same as above |
 | `python _smoke_test.py` | Full test: opens the window and visits every screen |
 | `python _verify_split.py` | Confirms every method survived the module split |
+| `python _capture_screenshots.py` | Regenerates the screenshots in `docs/screenshots/` |
 | `build_exe.bat` | Build `TransportApp.exe` |
 
 ---
