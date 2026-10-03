@@ -5,7 +5,7 @@ A repository containing two independent projects:
 | Folder | Project | Description |
 |---|---|---|
 | [`TransportSystem/`](TransportSystem/) | Transport Management System | Desktop app for trips, drivers, invoices, salaries and financial reports |
-| [`customs-clearance-billing/`](customs-clearance-billing/) | Customs Clearance Billing | Invoice & collection system for customs clearance, SQLite with an Excel mirror |
+| [`customs-billing/`](customs-billing/) | Customs Billing | Invoice & collection system for customs billing, SQLite with an Excel mirror |
 
 Each project is fully self-contained: it has its own entry point, requirements
 and documentation.
@@ -49,49 +49,49 @@ produces `TransportApp.exe`.
 
 ---
 
-## Customs Clearance Billing
+## Customs Billing
 
-Invoice and collection system for customs-clearance billing, with an Arabic
+Invoice and collection system for customs billing, with an Arabic
 interface. SQLite is the source of truth and `data.xlsx` is kept as a
 synchronised Excel mirror. Invoice and receipt numbers are generated
 automatically from the customer's company code, and receipts can be allocated
 to specific invoices or applied to the oldest unpaid ones (FIFO).
 
 ```bash
-cd customs-clearance-billing
+cd customs-billing
 pip install -r requirements.txt
 python main.py
 ```
 
-Full documentation: [`customs-clearance-billing/README.md`](customs-clearance-billing/README.md).
+Full documentation: [`customs-billing/README.md`](customs-billing/README.md).
 
 ### Screens
 
 | Dashboard | Invoice register |
 |---|---|
-| ![Dashboard](customs-clearance-billing/screenshots/01-dashboard.png) | ![Invoices](customs-clearance-billing/screenshots/02-invoices.png) |
+| ![Dashboard](customs-billing/screenshots/01-dashboard.png) | ![Invoices](customs-billing/screenshots/02-invoices.png) |
 
 | Customers | Payments & balances |
 |---|---|
-| ![Customers](customs-clearance-billing/screenshots/03-customers.png) | ![Payments](customs-clearance-billing/screenshots/04-payments.png) |
+| ![Customers](customs-billing/screenshots/03-customers.png) | ![Payments](customs-billing/screenshots/04-payments.png) |
 
 | New invoice form |
 |---|
-| ![Invoice form](customs-clearance-billing/screenshots/05-invoice-form.png) |
+| ![Invoice form](customs-billing/screenshots/05-invoice-form.png) |
 
 **The source contains no business data.** The SQLite database and `data.xlsx`
 are created on first run and are excluded by [.gitignore](.gitignore). Company
-details are set in `customs_clearance_billing/config.py`.
+details are set in `customs_billing/config.py`.
 
 The test suite covers the data layer and real UI flows:
 
 ```bash
-cd customs-clearance-billing
+cd customs-billing
 python -m pytest tests -q
 ```
 
-To build a standalone executable, run `customs-clearance-billing\build_exe.bat`,
-which produces `customs-clearance-billing.exe`.
+To build a standalone executable, run `customs-billing\build_exe.bat`,
+which produces `customs-billing.exe`.
 
 ---
 

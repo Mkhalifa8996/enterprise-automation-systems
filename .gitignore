@@ -1,5 +1,7 @@
 # ===== Tooling / editor config (personal, not part of the project) =====
 .claude/
+.kilo/
+.kilocode/
 .vscode/
 .idea/
 *.swp
@@ -25,6 +27,9 @@ dist/
 # ===== Runtime data — never commit real company records =====
 # The SQLite database and its Excel exports hold live business data.
 transport_data.db
+*.db
+*.db-wal
+*.db-shm
 *.xlsx
 app_errors.log
 app_errors.log.1

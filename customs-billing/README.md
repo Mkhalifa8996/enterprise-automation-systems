@@ -1,10 +1,10 @@
 <div align="center">
 
-# Customs Clearance Billing
+# Customs Billing
 
-**نظام فواتير التخليص الجمركي**
+**نظام الفوترة الجمركية**
 
-Desktop invoicing & collection system for customs-clearance billing.
+Desktop invoicing & collection system for customs billing.
 A standalone Windows application built with Python + Tkinter, backed by SQLite
 with an Excel mirror.
 
@@ -61,7 +61,7 @@ company code 25 -> 250001, 250002, 250003 ...
 
 | File | Role |
 |---|---|
-| `customs_clearance_billing.db` | **Source of truth** (SQLite). Created automatically on first run. |
+| `customs_billing.db` | **Source of truth** (SQLite). Created automatically on first run. |
 | `data.xlsx` | **Excel mirror**, refreshed after every change so it stays openable in Excel. |
 
 On first run, if the database is empty and an existing `data.xlsx` contains data,
@@ -94,7 +94,7 @@ Tkinter look); install it for the flatter, modern theme.
 
 ### First run
 
-1. Run `python main.py` - `customs_clearance_billing.db` and `data.xlsx` are created automatically.
+1. Run `python main.py` - `customs_billing.db` and `data.xlsx` are created automatically.
 
 No logo file is required. The header and the printed letterhead fall back to a
 text-only design, and the window keeps the default Tkinter icon. To use your own
@@ -111,10 +111,10 @@ build_exe.bat
 or directly:
 
 ```bash
-python -m PyInstaller --noconfirm --clean customs-clearance-billing.spec
+python -m PyInstaller --noconfirm --clean customs-billing.spec
 ```
 
-Output: `dist/customs-clearance-billing.exe` - a standalone binary that runs on
+Output: `dist/customs-billing.exe` - a standalone binary that runs on
 any Windows machine without installing Python.
 
 
@@ -125,9 +125,9 @@ any Windows machine without installing Python.
 |-- main.py                          entry point
 |-- requirements.txt
 |-- build_exe.bat                    executable build script
-|-- customs-clearance-billing.spec   PyInstaller configuration
+|-- customs-billing.spec             PyInstaller configuration
 |-- icon.png / logo.png              optional artwork (auto-detected)
-|-- customs_clearance_billing/       main package
+|-- customs_billing/                 main package
 |   |-- config.py                    paths + company identity (single source)
 |   |-- constants.py                 service lines, invoice fields, headers
 |   |-- utils.py                     number-to-words, safe conversions
@@ -165,12 +165,12 @@ recording a payment, allocating it, printing, CSV export, search and filtering.
 
 ## Customising the company name
 
-Company details live in one place - `customs_clearance_billing/config.py`:
+Company details live in one place - `customs_billing/config.py`:
 
 ```python
-APP_NAME        = "Customs Clearance Billing"
-COMPANY_NAME_AR = "شركة التخليص الجمركي للفوترة"
-COMPANY_NAME_EN = "Customs Clearance Billing"
+APP_NAME        = "Customs Billing"
+COMPANY_NAME_AR = "شركة الفوترة الجمركية"
+COMPANY_NAME_EN = "Customs Billing"
 ```
 
 Changing these updates the window header, the printed invoice letterhead, and
@@ -185,7 +185,7 @@ the customer statement.
 * Custom service-line labels are stored in the database and written into the
   Excel mirror's notes column in a tagged format, for compatibility with files
   produced by earlier versions.
-* Importing `customs_clearance_billing.data` does **not** load Tkinter, so the
+* Importing `customs_billing.data` does **not** load Tkinter, so the
   data layer can be scripted or tested headlessly.
 
 ## License
