@@ -2,7 +2,7 @@
 """اختبارات طبقة البيانات: قاعدة البيانات، الترحيل من إكسل، والحسابات.
 
 تُشغَّل مع:  python -m pytest tests -q
-كل اختبار يعمل على قاعدة بيانات مؤقتة معزولة (عبر CCB_DB_PATH)
+كل اختبار يعمل على قاعدة بيانات مؤقتة معزولة (عبر CB_DB_PATH)
 حتى لا يلمس بيانات المستخدم الحقيقية.
 """
 
@@ -20,8 +20,8 @@ def data(tmp_path, monkeypatch):
 
     المسارات تُقرأ من `config` عند الاستدعاء، فنكفي توجيهها هنا.
     """
-    import customs_clearance_billing.config as config
-    import customs_clearance_billing.data as data_pkg
+    import customs_billing.config as config
+    import customs_billing.data as data_pkg
 
     monkeypatch.setattr(config, "DB_FILE", str(tmp_path / "test.db"))
     monkeypatch.setattr(config, "DATA_FILE", str(tmp_path / "data.xlsx"))

@@ -9,7 +9,7 @@ from openpyxl import Workbook, load_workbook
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from customs_clearance_billing.constants import (
+from customs_billing.constants import (
     CUSTOMER_HEADERS,
     INVOICE_HEADERS,
     PAYMENT_HEADERS,
@@ -22,8 +22,8 @@ from customs_clearance_billing.constants import (
 
 @pytest.fixture()
 def data(tmp_path, monkeypatch):
-    import customs_clearance_billing.config as config
-    import customs_clearance_billing.data as data_pkg
+    import customs_billing.config as config
+    import customs_billing.data as data_pkg
 
     monkeypatch.setattr(config, "DB_FILE", str(tmp_path / "test.db"))
     monkeypatch.setattr(config, "DATA_FILE", str(tmp_path / "data.xlsx"))
@@ -270,7 +270,7 @@ def test_excel_read_roundtrip(data, tmp_path):
     items += [{"label": "", "labelEn": "", "dinar": 0, "fils": 0}] * 23
     data.save_invoice(_full_invoice(declno="9", port="الشعب", items=items))
 
-    from customs_clearance_billing.data import excel_mirror
+    from customs_billing.data import excel_mirror
     invs, _, _ = excel_mirror.read_workbook_data()
     assert len(invs) == 1
     assert invs[0]["invno"] == "010001"

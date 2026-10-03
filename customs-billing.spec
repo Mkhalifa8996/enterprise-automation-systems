@@ -2,7 +2,7 @@
 """ملف PyInstaller لبناء ملف تنفيذي مستقل.
 
 البناء من داخل مجلد المشروع:
-    python -m PyInstaller customs-clearance-billing.spec
+    python -m PyInstaller customs-billing.spec
 
 تُبنى المسارات نسبياً حتى يعمل البناء من أي مسار على أي جهاز.
 """
@@ -44,7 +44,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name="customs-clearance-billing",
+    name="customs-billing",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

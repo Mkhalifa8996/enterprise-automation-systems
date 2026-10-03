@@ -8,12 +8,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def main():
-    import customs_clearance_billing.data as data
+    import customs_billing.data as data
 
     data.ensure_storage()
     print("storage ready")
 
-    from customs_clearance_billing.ui.app import InvoiceApp
+    from customs_billing.ui.app import InvoiceApp
 
     app = InvoiceApp()
     app.update_idletasks()

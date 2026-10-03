@@ -14,12 +14,12 @@ import sys
 # ------------------------------------------------------------------
 # هوية التطبيق والشركة
 # ------------------------------------------------------------------
-APP_NAME = "Customs Clearance Billing"
-APP_SLUG = "customs-clearance-billing"
+APP_NAME = "Customs Billing"
+APP_SLUG = "customs-billing"
 APP_VERSION = "1.0.0"
 
-COMPANY_NAME_AR = "شركة التخليص الجمركي للفوترة"
-COMPANY_NAME_EN = "Customs Clearance Billing"
+COMPANY_NAME_AR = "شركة الفوترة الجمركية"
+COMPANY_NAME_EN = "Customs Billing"
 
 # عنوان النافذة الرئيسي
 WINDOW_TITLE_AR = f"نظام فواتير  —  {COMPANY_NAME_AR}"
@@ -34,7 +34,7 @@ def _app_dir():
     """
     if getattr(sys, "frozen", False):
         return os.path.dirname(os.path.abspath(sys.executable))
-    # هذا الملف داخل customs_clearance_billing/ ، فمجلد أبويه هو جذر المشروع.
+    # هذا الملف داخل customs_billing/ ، فمجلد أبويه هو جذر المشروع.
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -53,12 +53,12 @@ def resource_path(name):
 
 
 # قاعدة البيانات هي المصدر الأساسي لكل البيانات.
-# يسمح بتجاوز مسارها عبر متغيّر البيئة CCB_DB_PATH لأغراض الاختبار.
-DB_FILE = os.environ.get("CCB_DB_PATH") or os.path.join(APP_DIR, f"{APP_SLUG.replace('-', '_')}.db")
+# يسمح بتجاوز مسارها عبر متغيّر البيئة CB_DB_PATH لأغراض الاختبار.
+DB_FILE = os.environ.get("CB_DB_PATH") or os.path.join(APP_DIR, f"{APP_SLUG.replace('-', '_')}.db")
 
 # نسخة إكسل المرآة: تُحدَّث تلقائياً بعد كل تعديل، وتبقى قابلة للفتح في إكسل.
-# (CCB_XLSX_PATH يُستخدم لعزل ملف الإكسل أثناء الاختبارات فقط.)
-DATA_FILE = os.environ.get("CCB_XLSX_PATH") or os.path.join(APP_DIR, "data.xlsx")
+# (CB_XLSX_PATH يُستخدم لعزل ملف الإكسل أثناء الاختبارات فقط.)
+DATA_FILE = os.environ.get("CB_XLSX_PATH") or os.path.join(APP_DIR, "data.xlsx")
 
 ICON_FILE = resource_path("icon.png")   # أيقونة التطبيق (شعار مبسط بدون نص)
 LOGO_FILE = resource_path("logo.png")   # الشعار الكامل مع اسم الشركة

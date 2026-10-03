@@ -3,7 +3,7 @@ chcp 65001 >nul
 setlocal enabledelayedexpansion
 
 echo ================================================================
-echo   بناء ملف تشغيل (.exe) - نظام فواتير شركة التخليص الجمركي للفوترة
+echo   بناء ملف تشغيل (.exe) - نظام فواتير شركة الفوترة الجمركية
 echo ================================================================
 echo.
 
@@ -25,8 +25,8 @@ if not exist "main.py" (
     pause
     exit /b 1
 )
-if not exist "customs_clearance_billing\__init__.py" (
-    echo [خطأ] لم أجد مجلد customs_clearance_billing بجانب main.py.
+if not exist "customs_billing\__init__.py" (
+    echo [خطأ] لم أجد مجلد customs_billing بجانب main.py.
     pause
     exit /b 1
 )
@@ -47,14 +47,14 @@ if exist "icon.ico" set ICON_ARG=--icon="icon.ico"
 
 echo.
 echo [3/3] بناء الملف التنفيذي (قد يستغرق دقيقة أو أكثر)...
-if exist "customs-clearance-billing.spec" (
-    python -m PyInstaller --noconfirm --clean customs-clearance-billing.spec
+if exist "customs-billing.spec" (
+    python -m PyInstaller --noconfirm --clean customs-billing.spec
 ) else (
     set ADD_DATA=
     if exist "icon.png" set ADD_DATA=!ADD_DATA! --add-data "icon.png;."
     if exist "logo.png" set ADD_DATA=!ADD_DATA! --add-data "logo.png;."
     python -m PyInstaller --noconfirm --clean --onefile --windowed ^
-        --name "customs-clearance-billing" ^
+        --name "customs-billing" ^
         %ICON_ARG% %ADD_DATA% ^
         main.py
 )
@@ -69,11 +69,11 @@ if errorlevel 1 (
 echo.
 echo ================================================================
 echo   تم بنجاح! ستجد الملف التنفيذي هنا:
-echo   dist\customs-clearance-billing.exe
+echo   dist\customs-billing.exe
 echo.
 echo   انسخ هذا الملف إلى أي جهاز ويندوز وشغّله مباشرة - لا يحتاج
 echo   تثبيت بايثون على الجهاز الآخر. عند أول تشغيل سيُنشئ
-echo   customs_clearance_billing.db و data.xlsx بجانبه تلقائياً، وينقل أي بيانات
+echo   customs_billing.db و data.xlsx بجانبه تلقائياً، وينقل أي بيانات
 echo   موجودة في data.xlsx إلى قاعدة البيانات.
 echo ================================================================
 echo.

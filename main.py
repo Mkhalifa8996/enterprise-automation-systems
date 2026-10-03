@@ -4,7 +4,7 @@
 الاستخدام:
     python main.py
 أو بعد تثبيت الحزمة:
-    python -m customs_clearance_billing
+    python -m customs_billing
 """
 
 import os
@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 
 def main():
-    from customs_clearance_billing import run_application
+    from customs_billing import run_application
     return run_application()
 
 

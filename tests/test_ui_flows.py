@@ -22,15 +22,15 @@ _APP = None  # نافذة واحدة لكل جلسة الاختبار: إنشا�
 def _session_app():
     """نافذة واحدة تُنشأ مرة واحدة، لأن Tk لا يتحمّل إتلاف جذر ثم إنشاؤه من جديد."""
     global _APP
-    import customs_clearance_billing.config as config
-    import customs_clearance_billing.data as data_pkg
+    import customs_billing.config as config
+    import customs_billing.data as data_pkg
 
-    tmp = tempfile.mkdtemp(prefix="customs_clearance_billing_ui_")
+    tmp = tempfile.mkdtemp(prefix="customs_billing_ui_")
     config.DB_FILE = os.path.join(tmp, "t.db")
     config.DATA_FILE = os.path.join(tmp, "t.xlsx")
     data_pkg._migration_done = False
 
-    from customs_clearance_billing.ui.app import InvoiceApp
+    from customs_billing.ui.app import InvoiceApp
 
     _APP = InvoiceApp()
     yield _APP
@@ -49,8 +49,8 @@ def ui(monkeypatch, _session_app):
     """
     import tkinter.messagebox as mb
 
-    import customs_clearance_billing.config as config
-    import customs_clearance_billing.data as data_pkg
+    import customs_billing.config as config
+    import customs_billing.data as data_pkg
 
     for path in (config.DB_FILE, config.DATA_FILE,
                  config.DB_FILE + "-wal", config.DB_FILE + "-shm"):
@@ -88,7 +88,7 @@ def seed_invoice(invno="010001", customer="Ali", dinar=0, fils=0, filled=1, **ov
     `filled` يحدد عدد البنود التي تحمل قيمة (الباقي صفر)، تماماً كما يحدث
     عادةً في الاستخدام الحقيقي.
     """
-    from customs_clearance_billing.data import save_customer, save_invoice
+    from customs_billing.data import save_customer, save_invoice
 
     save_customer({"name": "Ali", "company_code": "01"})
     save_customer({"name": "Sara", "company_code": "02"})
@@ -107,7 +107,7 @@ def seed_invoice(invno="010001", customer="Ali", dinar=0, fils=0, filled=1, **ov
 
 # ------------------------------------------------------------------ العملاء
 def test_ui_customer_form_saves(ui):
-    from customs_clearance_billing.data import load_customers, next_available_company_code, save_customer
+    from customs_billing.data import load_customers, next_available_company_code, save_customer
 
     code = next_available_company_code()
     assert code == "01"
@@ -130,8 +130,8 @@ def test_ui_customer_form_requires_name(ui):
 
 # ------------------------------------------------------------------ الفواتير
 def test_ui_invoice_form_saves(ui):
-    from customs_clearance_billing.data import load_invoices, save_customer
-    from customs_clearance_billing.ui.invoice_form import InvoiceForm
+    from customs_billing.data import load_invoices, save_customer
+    from customs_billing.ui.invoice_form import InvoiceForm
 
     save_customer({"name": "Ali", "company_code": "01"})
     ui.refresh_customer_list()
@@ -163,7 +163,7 @@ def test_ui_invoice_form_saves(ui):
 
 
 def test_ui_invoice_form_requires_customer(ui):
-    from customs_clearance_billing.ui.invoice_form import InvoiceForm
+    from customs_billing.ui.invoice_form import InvoiceForm
 
     form = InvoiceForm(ui, invoice=None)
     form.update_idletasks()
@@ -179,8 +179,8 @@ def test_ui_invoice_form_rejects_duplicate_number(ui):
     نستخدم عميلاً بلا رمز شركة حتى لا يولّد النموذج رقماً تلقائياً، فيبقى
     الرقم المُدخَل يدوياً كما هو ويظهر تحذير التكرار.
     """
-    from customs_clearance_billing.data import load_invoices, save_customer
-    from customs_clearance_billing.ui.invoice_form import InvoiceForm
+    from customs_billing.data import load_invoices, save_customer
+    from customs_billing.ui.invoice_form import InvoiceForm
 
     seed_invoice("010001", "Ali", dinar=1)
     save_customer({"name": "NoCode", "company_code": ""})
@@ -197,8 +197,8 @@ def test_ui_invoice_form_rejects_duplicate_number(ui):
 
 
 def test_ui_invoice_form_edits_existing(ui):
-    from customs_clearance_billing.data import load_invoices
-    from customs_clearance_billing.ui.invoice_form import InvoiceForm
+    from customs_billing.data import load_invoices
+    from customs_billing.ui.invoice_form import InvoiceForm
 
     seed_invoice("010001", "Ali", dinar=10)
     ui.refresh_invoice_list()
@@ -218,7 +218,7 @@ def test_ui_invoice_form_edits_existing(ui):
 # ------------------------------------------------------------------ الدفعات
 def test_ui_payment_saves_with_auto_receipt(ui):
     """تسجيل دفعة عبر النموذج يجب أن يولّد رقم السند تلقائياً."""
-    from customs_clearance_billing.data import load_payments
+    from customs_billing.data import load_payments
 
     seed_invoice("010001", "Ali", dinar=100)
     ui.refresh_invoice_list()
@@ -247,7 +247,7 @@ def test_ui_payment_saves_with_auto_receipt(ui):
 
 
 def test_ui_payment_allocated_to_specific_invoice(ui):
-    from customs_clearance_billing.data import invoice_payment_status, load_payments
+    from customs_billing.data import invoice_payment_status, load_payments
 
     seed_invoice("010001", "Ali", dinar=100)
     seed_invoice("010002", "Ali", dinar=200)
@@ -268,14 +268,14 @@ def test_ui_payment_allocated_to_specific_invoice(ui):
     payments = load_payments()
     assert payments[0]["applied_invoices"] == ["010001"]
 
-    from customs_clearance_billing.data import load_invoices
+    from customs_billing.data import load_invoices
     status = invoice_payment_status(load_invoices(), load_payments())
     assert status["010001"]["paid"] == pytest.approx(50.0)
     assert status["010002"]["paid"] == pytest.approx(0.0)
 
 
 def test_ui_payment_requires_customer_and_amount(ui):
-    from customs_clearance_billing.data import load_payments
+    from customs_billing.data import load_payments
 
     ui.p_customer.set("")
     ui.save_payment_form()
@@ -288,7 +288,7 @@ def test_ui_payment_requires_customer_and_amount(ui):
 
 
 def test_ui_payment_edit_and_delete(ui):
-    from customs_clearance_billing.data import load_payments
+    from customs_billing.data import load_payments
 
     seed_invoice("010001", "Ali", dinar=100)
     ui.refresh_invoice_list()
@@ -332,7 +332,7 @@ def test_ui_invoice_search_and_filters(ui):
 
 
 def test_ui_delete_invoice_flow(ui):
-    from customs_clearance_billing.data import load_invoices
+    from customs_billing.data import load_invoices
 
     seed_invoice("010001", "Ali", dinar=1)
     ui.refresh_invoice_list()
@@ -353,8 +353,8 @@ def _html_from_url(url):
 
 
 def test_ui_print_invoice_document(ui, monkeypatch):
-    from customs_clearance_billing.data import load_invoices, save_invoice
-    from customs_clearance_billing.ui import printing
+    from customs_billing.data import load_invoices, save_invoice
+    from customs_billing.ui import printing
 
     seed_invoice("010001", "Ali", dinar=12, fils=500,
                  declno="55", port="الشعب", notes="ملاحظة طباعة")
@@ -382,8 +382,8 @@ def test_ui_print_invoice_document(ui, monkeypatch):
 
 
 def test_ui_print_statement_document(ui, monkeypatch):
-    from customs_clearance_billing.data import load_invoices, load_payments
-    from customs_clearance_billing.ui import printing
+    from customs_billing.data import load_invoices, load_payments
+    from customs_billing.ui import printing
 
     seed_invoice("010001", "Ali", dinar=100)
     opened = {}
@@ -413,7 +413,7 @@ def test_ui_export_invoices_csv(ui, monkeypatch, tmp_path):
 
 
 def test_ui_dashboard_reflects_data(ui):
-    from customs_clearance_billing.data import get_dashboard_stats
+    from customs_billing.data import get_dashboard_stats
 
     seed_invoice("010001", "Ali", dinar=100)
     ui.refresh_invoice_list()

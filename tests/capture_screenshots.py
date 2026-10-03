@@ -146,15 +146,15 @@ def seed_demo_data():
     """يبني بيانات تجريبية تمثّل الاستخدام الحقيقي (بأسماء شركات عامة)."""
     import tempfile
 
-    import customs_clearance_billing.config as config
-    import customs_clearance_billing.data as data
+    import customs_billing.config as config
+    import customs_billing.data as data
 
-    tmp = tempfile.mkdtemp(prefix="ccb_shots_")
+    tmp = tempfile.mkdtemp(prefix="CB_shots_")
     config.DB_FILE = os.path.join(tmp, "shots.db")
     config.DATA_FILE = os.path.join(tmp, "shots.xlsx")
     data._migration_done = False
 
-    from customs_clearance_billing.data import save_customer, save_invoice, save_payment
+    from customs_billing.data import save_customer, save_invoice, save_payment
 
     customers = [
         {"name": "National Trade Co.", "phone": "+965 6000 0000",
@@ -207,8 +207,8 @@ def main():
     """يبني بيانات تجريبية ويلتقط كل الشاشات."""
     seed_demo_data()
 
-    from customs_clearance_billing.ui.app import InvoiceApp
-    from customs_clearance_billing.ui.invoice_form import InvoiceForm
+    from customs_billing.ui.app import InvoiceApp
+    from customs_billing.ui.invoice_form import InvoiceForm
 
     app = InvoiceApp()
     app.geometry("1280x760+40+40")
