@@ -8,9 +8,38 @@ Catering management desktop application: institutional meal contracts, events &
 weddings, invoicing and receivables, purchases, expenses, payroll, and financial
 reports — with a full Arabic right-to-left interface.
 
+> [!WARNING]
+> **This project is still under active development (v2.3.0).**
+> Screens and workflows are being refined and some areas are incomplete —
+> see [Project status](#project-status) for what is done and what is next.
+> Please treat it as a work in progress and report issues as you find them.
+
 **Version:** 2.3.0 · **Language:** Python 3.11+ · **UI:** Tkinter (full RTL) · **Storage:** SQLite (Excel import/export)
 
 ![Home screen](screenshots/01-home.png)
+
+---
+
+## Project status
+
+**Status: under construction** — the app runs, the test suite is green, and the
+core workflows are usable, but the product is not finished.
+
+| Area | State |
+|---|---|
+| Orders, events, quotations, delivery scheduling | Working |
+| Invoicing, partial payments, customer statements | Working |
+| Purchases, expenses, petty cash | Working |
+| Payroll | Working |
+| Financial reports and charts | Working |
+| Arabic PDF invoices and statements | Working |
+| Costing, recipes and stock movements | Planned |
+| VAT / tax fields and yearly invoice series | Planned |
+| QR e-invoice and kitchen order tickets | Planned |
+| Multi-user access and roles | Planned |
+| Arabic/English language switch | Planned |
+
+The next stages are tracked in [`EVOLUTION.md`](EVOLUTION.md).
 
 ---
 
