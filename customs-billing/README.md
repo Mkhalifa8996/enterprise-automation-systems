@@ -2,7 +2,7 @@
 
 # Customs Billing
 
-**نظام الفوترة الجمركية**
+**فواتير جمركية**
 
 Desktop invoicing & collection system for customs billing.
 A standalone Windows application built with Python + Tkinter, backed by SQLite
@@ -169,7 +169,7 @@ Company details live in one place - `customs_billing/config.py`:
 
 ```python
 APP_NAME        = "Customs Billing"
-COMPANY_NAME_AR = "شركة الفوترة الجمركية"
+COMPANY_NAME_AR = "فواتير جمركية"
 COMPANY_NAME_EN = "Customs Billing"
 ```
 

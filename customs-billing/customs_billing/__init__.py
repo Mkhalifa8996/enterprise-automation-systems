@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""نظام الفوترة الجمركية — Customs Billing.
+"""فواتير جمركية — Customs Billing.
 
 حزمة مقسّمة إلى طبقات:
     config / constants / utils   إعدادات وثوابت ودوال مساعدة.

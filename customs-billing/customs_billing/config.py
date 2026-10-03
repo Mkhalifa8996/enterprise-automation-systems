@@ -18,11 +18,11 @@ APP_NAME = "Customs Billing"
 APP_SLUG = "customs-billing"
 APP_VERSION = "1.0.0"
 
-COMPANY_NAME_AR = "شركة الفوترة الجمركية"
+COMPANY_NAME_AR = "فواتير جمركية"
 COMPANY_NAME_EN = "Customs Billing"
 
 # عنوان النافذة الرئيسي
-WINDOW_TITLE_AR = f"نظام فواتير  —  {COMPANY_NAME_AR}"
+WINDOW_TITLE_AR = COMPANY_NAME_AR
 
 
 def _app_dir():
