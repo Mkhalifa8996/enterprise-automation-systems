@@ -94,8 +94,13 @@ Tkinter look); install it for the flatter, modern theme.
 
 ### First run
 
-1. Place `icon.png` and `logo.png` next to `main.py`.
-2. Run `python main.py` - `customs_clearance_billing.db` and `data.xlsx` are created automatically.
+1. Run `python main.py` - `customs_clearance_billing.db` and `data.xlsx` are created automatically.
+
+No logo file is required. The header and the printed letterhead fall back to a
+text-only design, and the window keeps the default Tkinter icon. To use your own
+branding, drop `logo.png` (full logo for the header) and `icon.png` (window and
+letterhead artwork) next to `main.py` - both are picked up automatically when
+present and bundled into the executable by `build_exe.bat`.
 
 ## Building the executable
 
@@ -121,7 +126,7 @@ any Windows machine without installing Python.
 |-- requirements.txt
 |-- build_exe.bat                    executable build script
 |-- customs-clearance-billing.spec   PyInstaller configuration
-|-- icon.png / logo.png              application artwork
+|-- icon.png / logo.png              optional artwork (auto-detected)
 |-- customs_clearance_billing/       main package
 |   |-- config.py                    paths + company identity (single source)
 |   |-- constants.py                 service lines, invoice fields, headers
