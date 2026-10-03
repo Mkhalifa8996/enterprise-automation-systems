@@ -122,24 +122,6 @@ def shot(widget, filename):
     capture(widget, path)
     print("saved", filename)
     return path
-def anonymise_path_labels(root):
-    """يستبدل مسار التخزين الظاهر في الترويسة بنص محايد.
-
-    التطبيق يعرض المسار الحقيقي لأنه معلومة مفيدة للمستخدم، لكن اللقطات
-    المنشورة في README لا ينبغي أن تكشف مسار الجهاز أو اسم المجلد المحلي.
-    """
-    def walk(widget):
-        try:
-            if widget.winfo_class() in ("Label", "TLabel"):
-                text = widget.cget("text")
-                if isinstance(text, str) and "📁" in text:
-                    widget.config(text="\U0001F4C1  data.xlsx  (قاعدة البيانات ونسخة إكسل)")
-        except Exception:
-            pass
-        for child in widget.winfo_children():
-            walk(child)
-
-    walk(root)
 
 
 def seed_demo_data():
@@ -213,7 +195,6 @@ def main():
     app = InvoiceApp()
     app.geometry("1280x760+40+40")
     app.update()
-    anonymise_path_labels(app)
 
     app.refresh_dashboard()
     shot(app, "01-dashboard.png")

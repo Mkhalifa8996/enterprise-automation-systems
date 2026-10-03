@@ -11,7 +11,7 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 
 from ..config import (
-    APP_NAME, APP_VERSION, COMPANY_NAME_AR, COMPANY_NAME_EN, DATA_FILE,
+    APP_NAME, APP_VERSION, COMPANY_NAME_AR, COMPANY_NAME_EN,
     ICON_FILE, LOGO_FILE, WINDOW_TITLE_AR, get_tk_font,
 )
 from ..data import SaveError, ensure_storage
@@ -84,42 +84,13 @@ class InvoiceApp(
             except tk.TclError:
                 pass  # صيغة الصورة غير مدعومة من Tk المثبت؛ يُتجاهل بأمان
 
-        header = tk.Frame(self, bg=COL_NAVY, height=72)
+        # ==================== الشريط العلوي (App bar) ====================
+        header = tk.Frame(self, bg=COL_NAVY, height=84)
         header.pack(fill="x", side="top")
         header.pack_propagate(False)
-        # شريط رفيع بلون الهوية الذهبي أسفل الرأس لإضافة لمسة تصميمية عصرية
+        # خط تمييز ذهبي رفيع أسفل الشريط لإضفاء لمسة هوية عصرية
         tk.Frame(self, bg=COL_GOLD, height=3).pack(fill="x", side="top")
-
-        brand_frame = tk.Frame(header, bg=COL_NAVY)
-        brand_frame.pack(side="right", padx=(4, 22), pady=10)
-        brand_frame.grid_columnconfigure(0, weight=0)
-        brand_frame.grid_columnconfigure(1, weight=0)
-        brand_frame.grid_columnconfigure(2, weight=0)
-
-        if os.path.exists(LOGO_FILE):
-            try:
-                logo_full = tk.PhotoImage(file=LOGO_FILE)
-                factor = max(1, logo_full.width() // 52)
-                self._header_logo_img = logo_full.subsample(factor, factor)
-                tk.Label(brand_frame, image=self._header_logo_img, bg=COL_NAVY).grid(row=0, rowspan=2, column=2, padx=(14, 0))
-            except tk.TclError:
-                tk.Label(brand_frame, text="🚢 ✈️ 🚚", bg=COL_NAVY, fg=COL_GOLD,
-                         font=get_tk_font(15)).grid(row=0, rowspan=2, column=2, padx=(14, 0))
-        else:
-            tk.Label(brand_frame, text="🚢 ✈️ 🚚", bg=COL_NAVY, fg=COL_GOLD,
-                     font=get_tk_font(15)).grid(row=0, rowspan=2, column=2, padx=(14, 0))
-
-        tk.Label(brand_frame, text=COMPANY_NAME_AR,
-                 bg=COL_NAVY, fg="white", font=get_tk_font(15, "bold"), justify="right").grid(row=0, column=0, columnspan=2, sticky="e")
-        tk.Label(brand_frame, text=COMPANY_NAME_EN,
-                 bg=COL_NAVY, fg=COL_GOLD, font=get_tk_font(9), justify="right").grid(row=1, column=0, columnspan=2, sticky="e", pady=(2, 0))
-
-        info_frame = tk.Frame(header, bg=COL_NAVY)
-        info_frame.pack(side="right", padx=20)
-        tk.Label(info_frame, text=APP_NAME, bg=COL_NAVY, fg="white",
-                 font=get_tk_font(11, "bold")).pack(anchor="w")
-        tk.Label(info_frame, text=f"📁 {DATA_FILE}",
-                 bg=COL_NAVY, fg="#8FA3B8", font=get_tk_font(8)).pack(anchor="w", pady=(2, 0))
+        self._build_app_bar(header)
 
         content = tk.Frame(self, bg=COL_BG)
         content.pack(fill="both", expand=True, padx=16, pady=16)
@@ -182,6 +153,51 @@ class InvoiceApp(
         self.refresh_dashboard()
 
         self.notebook.bind("<<NotebookTabChanged>>", self._on_tab_changed)
+
+    def _load_app_bar_logo(self):
+        """يحضّر صورة الشعار بحجم مناسب لشريط العنوان، أو None إن لم تتوفّر."""
+        for path in (LOGO_FILE, ICON_FILE):
+            if os.path.exists(path):
+                try:
+                    full = tk.PhotoImage(file=path)
+                except tk.TclError:
+                    continue
+                factor = max(1, round(full.width() / 52))
+                return full.subsample(factor, factor)
+        return None
+
+    def _build_app_bar(self, header):
+        """يبني الشريط العلوي: الشعار واسم الشركة يميناً، ووصف مختصر ورقم الإصدار يساراً."""
+        # ---- الجهة اليمنى (RTL): الشعار ثم اسم الشركة بالعربية والإنجليزية ----
+        brand = tk.Frame(header, bg=COL_NAVY)
+        brand.pack(side="right", padx=(8, 24), pady=12)
+
+        logo_img = self._load_app_bar_logo()
+        if logo_img is not None:
+            self._header_logo_img = logo_img
+            # الشعار بخلفية بيضاء، فنضعه على بطاقة بيضاء صغيرة تبرز بوضوح فوق الشريط الكحلي
+            tile = tk.Frame(brand, bg="white", highlightbackground=COL_GOLD,
+                            highlightthickness=1, padx=6, pady=5)
+            tile.pack(side="right", padx=(14, 0))
+            tk.Label(tile, image=logo_img, bg="white", bd=0).pack()
+        else:
+            tk.Label(brand, text="🚢 ✈️ 🚚", bg=COL_NAVY, fg=COL_GOLD,
+                     font=get_tk_font(15)).pack(side="right", padx=(14, 0))
+
+        names = tk.Frame(brand, bg=COL_NAVY)
+        names.pack(side="right")
+        tk.Label(names, text=COMPANY_NAME_AR, bg=COL_NAVY, fg="white",
+                 font=get_tk_font(16, "bold"), justify="right").pack(anchor="e")
+        tk.Label(names, text=COMPANY_NAME_EN, bg=COL_NAVY, fg=COL_GOLD,
+                 font=get_tk_font(9), justify="right").pack(anchor="e", pady=(3, 0))
+
+        # ---- الجهة اليسرى: وصف مختصر ورقم الإصدار ----
+        meta = tk.Frame(header, bg=COL_NAVY)
+        meta.pack(side="left", padx=(24, 10))
+        tk.Label(meta, text="نظام الفوترة والتحصيل الجمركي", bg=COL_NAVY,
+                 fg="#9FB2C6", font=get_tk_font(9)).pack(anchor="w")
+        tk.Label(meta, text=f"الإصدار {APP_VERSION}", bg=COL_NAVY, fg=COL_GOLD,
+                 font=get_tk_font(8, "bold")).pack(anchor="w", pady=(4, 0))
 
     def _refresh_nav_selection(self):
         active = self.notebook.select()
