@@ -73,7 +73,7 @@ class AttachmentPicker(ttk.Frame):
         self.parent = parent
 
         inner = tk.Frame(self, bg=COLOR_CARD)
-        inner.pack(fill="x", side="left")
+        inner.pack(fill="x", side="right")
 
         self.entry = ttk.Entry(inner, textvariable=var, font=F_BODY,
                                justify="right", state="readonly", width=22,

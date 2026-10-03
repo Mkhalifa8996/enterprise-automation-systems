@@ -84,7 +84,7 @@ class RecordPrintWindow(tk.Toplevel):
                      bg=COLOR_CARD, fg=COLOR_MUTED, anchor="e").pack(side="right")
             ttk.Button(img_frame, text="فتح صورة الفاتورة",
                        command=lambda p=bill_image_path: open_path_with_default_app(p)).pack(
-                side="left", padx=(10, 0))
+                side="right", padx=(0, 10))
             row_y += 1
 
         self.transient(parent)

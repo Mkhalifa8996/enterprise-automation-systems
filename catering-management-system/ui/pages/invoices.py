@@ -12,6 +12,7 @@ import webbrowser
 import tkinter as tk
 from tkinter import ttk
 from ui import dialogs as messagebox
+from ui.rtl import add_rtl_tabs
 import restaurant_data as rd
 from ui.theme import (
     COLOR_BG,
@@ -41,9 +42,11 @@ class InvoicesPages:
         issue_tab = tk.Frame(nb, bg=COLOR_BG)
         payments_tab = tk.Frame(nb, bg=COLOR_BG)
         statement_tab = tk.Frame(nb, bg=COLOR_BG)
-        nb.add(issue_tab, text=" 🧾 إصدار الفواتير والسجل ")
-        nb.add(payments_tab, text=" 💵 تسجيل دفعة ")
-        nb.add(statement_tab, text=" 📄 كشف حساب عميل ")
+        add_rtl_tabs(nb, [
+            (issue_tab, " 🧾 إصدار الفواتير والسجل "),
+            (payments_tab, " 💵 تسجيل دفعة "),
+            (statement_tab, " 📄 كشف حساب عميل "),
+        ])
 
         self._build_issue_section(issue_tab)
         self._build_payments_section(payments_tab)
@@ -103,7 +106,7 @@ class InvoicesPages:
         self.inv_orders_list.bind("<Double-1>", lambda e: self.issue_invoice())
 
         events_box = card_frame(lists_frame, "عزائم ومناسبات غير مفوترة لهذا العميل")
-        events_box.pack(side="left", fill="both", expand=True, padx=(0, 8))
+        events_box.pack(side="right", fill="both", expand=True, padx=(8, 0))
         self.inv_events_list = tk.Listbox(events_box.body, selectmode="multiple", font=F_BODY,
                                            justify="right", height=10, relief="flat",
                                            highlightthickness=0, activestyle="none")

@@ -257,19 +257,71 @@ def scroll_charts_to_top(window):
 
 
 
+def grab_window(hwnd, path):
+    """
+    يلتقط محتوى النافذة مباشرة عبر PrintWindow بدل تصوير الشاشة.
+
+    تصوير الشاشة لا يصلح هنا: لو كانت هناك نافذة أخرى فوق التطبيق (متصفح مثلاً)
+    لتقطها الصورة كلها. هذه الطريقة ترسم نافذة التطبيق نفسها فقط، فيكون
+    الناتج نظيفاً مهما كان ما يحدث على الشاشة.
+    """
+    import ctypes
+    import ctypes.wintypes as wintypes
+    from PIL import Image
+
+    user32 = ctypes.windll.user32
+    gdi32 = ctypes.windll.gdi32
+
+    rect = wintypes.RECT()
+    user32.GetWindowRect(hwnd, ctypes.byref(rect))
+    width, height = rect.right - rect.left, rect.bottom - rect.top
+    if width <= 0 or height <= 0:
+        raise RuntimeError("حجم النافذة غير صالح")
+
+    hwnd_dc = user32.GetWindowDC(hwnd)
+    mem_dc = gdi32.CreateCompatibleDC(hwnd_dc)
+    bitmap = gdi32.CreateCompatibleBitmap(hwnd_dc, width, height)
+    gdi32.SelectObject(mem_dc, bitmap)
+    user32.PrintWindow(hwnd, mem_dc, 2)          # PW_RENDERFULLCONTENT
+
+    class BITMAPINFOHEADER(ctypes.Structure):
+        _fields_ = [("biSize", wintypes.DWORD), ("biWidth", wintypes.LONG),
+                    ("biHeight", wintypes.LONG), ("biPlanes", wintypes.WORD),
+                    ("biBitCount", wintypes.WORD), ("biCompression", wintypes.DWORD),
+                    ("biSizeImage", wintypes.DWORD),
+                    ("biXPelsPerMeter", wintypes.LONG),
+                    ("biYPelsPerMeter", wintypes.LONG),
+                    ("biClrUsed", wintypes.DWORD),
+                    ("biClrImportant", wintypes.DWORD)]
+
+    header = BITMAPINFOHEADER()
+    header.biSize = ctypes.sizeof(BITMAPINFOHEADER)
+    header.biWidth = width
+    header.biHeight = -height                    # من الأعلى للأسفل
+    header.biPlanes = 1
+    header.biBitCount = 32
+    header.biCompression = 0                     # BI_RGB
+
+    buffer = ctypes.create_string_buffer(width * height * 4)
+    gdi32.GetDIBits(mem_dc, bitmap, 0, height, buffer, ctypes.byref(header), 0)
+
+    gdi32.DeleteObject(bitmap)
+    gdi32.DeleteDC(mem_dc)
+    user32.ReleaseDC(hwnd, hwnd_dc)
+
+    Image.frombuffer("RGB", (width, height), buffer, "raw", "BGRX", 0, 1).save(path)
+    return width, height
+
+
 def capture():
     """يعرض كل شاشة على حدة ويلتقط صورة لها."""
-    from PIL import ImageGrab
-
     if not os.path.isdir(SHOTS_DIR):
         os.makedirs(SHOTS_DIR, exist_ok=True)
 
     window = app.RestaurantApp()
     window.geometry("%dx%d+0+0" % (WIDTH, HEIGHT))
-    try:
-        window.attributes("-topmost", True)   # تبقى فوق أي نافذة أخرى أثناء الالتقاط
-    except Exception:                        # بعض الأنظمة لا تدعم الخاصية
-        pass
+    window.update_idletasks()
+    window.update()
 
     for filename, key, sub_index in SCREENS:
         window.show_page(key, sub_index)
@@ -281,6 +333,18 @@ def capture():
             window.update_idletasks()
             window.update()
 
+        if key == "invoices":
+            # القوائم الفرعية تُملأ حسب العميل المختار، فنختار عميلاً
+            # لديه طلبات غير مفوترة حتى لا تظهر الشاشة فارغة في الصورة
+            pending = [c["name"] for c in rd.load_customers()
+                       if rd.unbilled_institutional_orders_for_customer(c["name"])]
+            if pending:
+                window.refresh_customer_combo()
+                window.inv_customer_var.set(pending[0])
+                window.refresh_unbilled_lists()
+                window.update_idletasks()
+                window.update()
+
         time.sleep(0.7)                      # نمهل Tkinter قبل الالتقاط
 
         if key == "reports":
@@ -291,11 +355,14 @@ def capture():
             window.update()
             time.sleep(0.4)
 
-        # نلتقط حدود النافذة الفعلية لا منطقة ثابتة، فلا ينقص أي جزء
-        x, y = window.winfo_rootx(), window.winfo_rooty()
-        w, h = window.winfo_width(), window.winfo_height()
+        # نثبّت المقاس قبل كل لقطة: بعض الشاشات قد تطلب اتساعاً أكبر
+        # فيكبر النافذة، ونريد صوراً كلها بمقاس واحد
+        window.geometry("%dx%d+0+0" % (WIDTH, HEIGHT))
+        window.update_idletasks()
+        window.update()
+
         path = os.path.join(SHOTS_DIR, filename)
-        ImageGrab.grab(bbox=(x, y, x + w, y + h)).save(path)
+        w, h = grab_window(window.winfo_id(), path)
         print("saved %s (%dx%d)" % (path, w, h))
 
     window.destroy()

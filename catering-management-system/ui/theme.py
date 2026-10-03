@@ -68,7 +68,7 @@ class ScrollableFrame(tk.Frame):
         self._canvas = tk.Canvas(self, bg=COLOR_BG, highlightthickness=0)
         self._vsb = ttk.Scrollbar(self, orient="vertical", command=self._canvas.yview)
         self._canvas.configure(yscrollcommand=self._vsb.set)
-        self._vsb.pack(side="right", fill="y")
+        self._vsb.pack(side="left", fill="y")
         self._canvas.pack(side="left", fill="both", expand=True)
 
         self.inner = tk.Frame(self._canvas, bg=COLOR_BG)

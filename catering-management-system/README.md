@@ -8,9 +8,31 @@ Catering management desktop application: institutional meal contracts, events &
 weddings, invoicing and receivables, purchases, expenses, payroll, and financial
 reports — with a full Arabic right-to-left interface.
 
-**Version:** 2.3.0 · **Language:** Python 3.11+ · **UI:** Tkinter · **Storage:** SQLite (Excel import/export)
+**Version:** 2.3.0 · **Language:** Python 3.11+ · **UI:** Tkinter (full RTL) · **Storage:** SQLite (Excel import/export)
 
 ![Home screen](screenshots/01-home.png)
+
+---
+
+## Arabic right-to-left support
+
+The whole interface is built for Arabic, right to left:
+
+| Element | Behaviour |
+|---|---|
+| **Navigation** | The sidebar sits on the **right**; its items read top-down in Arabic |
+| **Tables** | Column order is mirrored — the first column appears **rightmost** — and every heading and cell is right-aligned |
+| **Fields** | Every entry, combo box and date field takes input from the **right**, with the caret at the right edge |
+| **Buttons** | Action bars fill from the right, so the primary action is the right-most button |
+| **Tabs** | Sub-tabs run right to left; the first tab is the right-most and the default |
+| **Scrollbars** | Vertical scrollbars sit on the **left**, as Arabic users expect |
+| **Text panels** | Report output and the printable invoice/statement are `dir="rtl"` |
+| **PDF** | Arabic is reshaped and reordered with `arabic-reshaper` + `python-bidi` |
+
+Tkinter has no native RTL mode, so these rules are centralised in
+[`ui/rtl.py`](ui/rtl.py) and applied in one pass after the screens are built —
+new widgets inherit the correct direction automatically instead of each screen
+repeating the rules.
 
 ---
 
@@ -110,6 +132,7 @@ core/
 ui/
   theme.py                    Colours, fonts, shared widgets, scroll area
   nav.py                      Sidebar and page registry
+  rtl.py                      Right-to-left rules for fields, tables and tabs
   tabs.py                     Reusable CRUD / dated-order tab screens
   dialogs.py                  Single messagebox seam for the whole UI
   printing.py                 HTML print output for invoices and reports

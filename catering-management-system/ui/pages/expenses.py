@@ -9,6 +9,7 @@
 
 import restaurant_data as rd
 from ui.tabs import CrudTab, DatedOrderTab
+from ui.rtl import add_rtl_tabs
 
 
 class ExpensesPages:
@@ -28,10 +29,12 @@ class ExpensesPages:
         setup_tab = tk.Frame(nb, bg=COLOR_BG)
         monthly_tab = tk.Frame(nb, bg=COLOR_BG)
         petty_tab = tk.Frame(nb, bg=COLOR_BG)
-        nb.add(purchases_tab, text=" 🛒 المشتريات اليومية ")
-        nb.add(setup_tab, text=" 🏗 مصاريف التأسيس ")
-        nb.add(monthly_tab, text=" 📅 المصاريف الشهرية ")
-        nb.add(petty_tab, text=" 💸 النثريات اليومية ")
+        add_rtl_tabs(nb, [
+            (purchases_tab, " 🛒 المشتريات اليومية "),
+            (setup_tab, " 🏗 مصاريف التأسيس "),
+            (monthly_tab, " 📅 المصاريف الشهرية "),
+            (petty_tab, " 💸 النثريات اليومية "),
+        ])
 
         self._build_purchases_tab(purchases_tab)
         self._build_setup_expenses_tab(setup_tab)

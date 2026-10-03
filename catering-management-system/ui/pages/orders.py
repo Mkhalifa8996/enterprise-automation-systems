@@ -11,6 +11,7 @@ from datetime import date
 import tkinter as tk
 from tkinter import ttk
 from ui import dialogs as messagebox
+from ui.rtl import add_rtl_tabs
 import restaurant_data as rd
 from ui.theme import (
     COLOR_BG,
@@ -37,10 +38,12 @@ class OrdersPages:
         events_tab = tk.Frame(nb, bg=COLOR_BG)
         quotes_tab = tk.Frame(nb, bg=COLOR_BG)
         dlv_tab = tk.Frame(nb, bg=COLOR_BG)
-        nb.add(inst_tab, text=" 🏢 طلبات المؤسسات ")
-        nb.add(events_tab, text=" 🎉 المناسبات والولائم ")
-        nb.add(quotes_tab, text=" 📝 عروض الأسعار ")
-        nb.add(dlv_tab, text=" 🚚 جدولة التوصيل ")
+        add_rtl_tabs(nb, [
+            (inst_tab, " 🏢 طلبات المؤسسات "),
+            (events_tab, " 🎉 المناسبات والولائم "),
+            (quotes_tab, " 📝 عروض الأسعار "),
+            (dlv_tab, " 🚚 جدولة التوصيل "),
+        ])
 
         self._build_institutional_tab(inst_tab)
         self._build_events_tab(events_tab)

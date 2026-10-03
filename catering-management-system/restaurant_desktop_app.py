@@ -39,6 +39,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from ui import dialogs as messagebox
+from ui.rtl import apply_rtl, tab_index
 
 import restaurant_data as rd
 
@@ -132,6 +133,10 @@ class RestaurantApp(HomePages, OrdersPages, ExpensesPages, MasterDataPages,
         self._build_salaries_tab()
         self._build_reports_tab()
 
+        # توجيه الواجهة بالكامل من اليمين إلى اليسار بعد بناء كل الشاشات:
+        # محاذاة الحقول، عكس ترتيب أعمدة الجداول، وتمرير يسار الجداول.
+        apply_rtl(self)
+
         self.show_page("home")
 
     # ---------------- التنقّل بين الشاشات ----------------
@@ -153,10 +158,13 @@ class RestaurantApp(HomePages, OrdersPages, ExpensesPages, MasterDataPages,
         if sub_index is not None:
             notebook = self.sub_notebooks.get(key)
             if notebook is not None:
-                try:
-                    notebook.select(sub_index)
-                except tk.TclError:
-                    pass
+                # التبويبات مرسومة معكوسة للـ RTL، فنترجم الرقم المنطقي
+                target = tab_index(notebook, sub_index)
+                if target is not None:
+                    try:
+                        notebook.select(target)
+                    except tk.TclError:
+                        pass
         for fn in self.page_refreshers.get(key, []):
             try:
                 fn()

@@ -9,6 +9,7 @@
 
 import restaurant_data as rd
 from ui.tabs import CrudTab
+from ui.rtl import add_rtl_tabs
 
 
 class MasterDataPages:
@@ -28,10 +29,12 @@ class MasterDataPages:
         staff_tab = tk.Frame(nb, bg=COLOR_BG)
         equipment_tab = tk.Frame(nb, bg=COLOR_BG)
         products_tab = tk.Frame(nb, bg=COLOR_BG)
-        nb.add(customers_tab, text=" 👥 العملاء ")
-        nb.add(staff_tab, text=" 👨‍🍳 العمال والشيفات ")
-        nb.add(equipment_tab, text=" 🧰 المعدات والسيارات ")
-        nb.add(products_tab, text=" 🍽 الأصناف والمنيو ")
+        add_rtl_tabs(nb, [
+            (customers_tab, " 👥 العملاء "),
+            (staff_tab, " 👨‍🍳 العمال والشيفات "),
+            (equipment_tab, " 🧰 المعدات والسيارات "),
+            (products_tab, " 🍽 الأصناف والمنيو "),
+        ])
 
         self._build_customers_tab(customers_tab)
         self._build_staff_tab(staff_tab)

@@ -99,7 +99,7 @@ which produces `customs-billing.exe`.
 ## Catering Management System
 
 Desktop system for a catering business with a full Arabic right-to-left
-interface. Covers institutional meal contracts, events and
+interface — sidebar, tables, fields, buttons and tabs all mirror correctly. Covers institutional meal contracts, events and
 weddings, invoicing with partial payments and customer statements, purchases,
 expenses, payroll and financial reports.
 
