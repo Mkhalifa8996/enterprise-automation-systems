@@ -53,7 +53,7 @@ def legacy_workbook(path, invoices=None, customers=None, payments=None):
     wb.save(path)
 
 
-def legacy_invoice_row(invno="010001", date="2026-07-11", customer="Wazzan",
+def legacy_invoice_row(invno="010001", date="2026-07-11", customer="East Port",
                        dinar=0, fils=0, filled=1):
     """صف فاتورة بطول الأعمدة القديم: 9 حقول + 48 عمود بند + ملاحظات + إجمالي.
 
@@ -74,17 +74,17 @@ def test_migration_imports_legacy_workbook(data, tmp_path):
         tmp_path / "data.xlsx",
         invoices=[legacy_invoice_row("010001", dinar=10, fils=250),
                   legacy_invoice_row("010002", dinar=5)],
-        customers=[["Wazzan", "123", "عنوان", "ملاحظة", "1"],
+        customers=[["East Port", "123", "عنوان", "ملاحظة", "1"],
                    ["Majed", "456", "عنوان", "", "2"]],
-        payments=[["010001", "Wazzan", "2026-07-30", 15.25, "دفعة", "010001"]],
+        payments=[["010001", "East Port", "2026-07-30", 15.25, "دفعة", "010001"]],
     )
 
     assert data.migrate_excel_to_database() is True
 
     customers = data.load_customers()
-    assert sorted(c["name"] for c in customers) == ["Majed", "Wazzan"]
+    assert sorted(c["name"] for c in customers) == ["East Port", "Majed"]
     # رمز الشركة يُطبَّع أثناء الترحيل
-    assert {c["name"]: c["company_code"] for c in customers}["Wazzan"] == "01"
+    assert {c["name"]: c["company_code"] for c in customers}["East Port"] == "01"
 
     invoices = data.load_invoices()
     assert len(invoices) == 2
@@ -101,7 +101,7 @@ def test_migration_imports_legacy_workbook(data, tmp_path):
 def test_migration_skipped_when_db_not_empty(data, tmp_path):
     legacy_workbook(tmp_path / "data.xlsx",
                     invoices=[legacy_invoice_row("010001", dinar=1)],
-                    customers=[["Wazzan", "", "", "", "1"]])
+                    customers=[["East Port", "", "", "", "1"]])
     assert data.migrate_excel_to_database() is True
 
     # الاستيراد الثاني يجب ألا يكرّر البيانات
@@ -155,30 +155,30 @@ def test_next_receipt_number_sequences(data):
 
 
 def test_find_customer_by_company_code(data):
-    data.save_customer({"name": "Wazzan", "company_code": "01"})
+    data.save_customer({"name": "East Port", "company_code": "01"})
     data.save_customer({"name": "Majed", "company_code": "02"})
-    assert data.find_customer_by_company_code("01") == "Wazzan"
-    assert data.find_customer_by_company_code("01", exclude_name="Wazzan") is None
+    assert data.find_customer_by_company_code("01") == "East Port"
+    assert data.find_customer_by_company_code("01", exclude_name="East Port") is None
     assert data.find_customer_by_company_code("77") is None
 
 
 # ------------------------------------------------------------------ الحسابات
-def _invoice(invno, total, customer="Wazzan", date="2026-01-01"):
+def _invoice(invno, total, customer="East Port", date="2026-01-01"):
     return {"invno": invno, "total": total, "customer": customer, "date": date,
             "items": []}
 
 
 def test_customer_balances(data):
     invs = [_invoice("1", 100.0), _invoice("2", 50.0, customer="Majed")]
-    pays = [{"id": "p1", "customer": "Wazzan", "amount": 30.0, "applied_invoices": []}]
+    pays = [{"id": "p1", "customer": "East Port", "amount": 30.0, "applied_invoices": []}]
     balances = {b["customer"]: b for b in data.customer_balances(invs, pays)}
-    assert balances["Wazzan"]["balance"] == pytest.approx(70.0)
+    assert balances["East Port"]["balance"] == pytest.approx(70.0)
     assert balances["Majed"]["balance"] == pytest.approx(50.0)
 
 
 def test_invoice_payment_status_specific_allocation(data):
     invs = [_invoice("1", 100.0), _invoice("2", 100.0)]
-    pays = [{"id": "p1", "customer": "Wazzan", "amount": 60.0,
+    pays = [{"id": "p1", "customer": "East Port", "amount": 60.0,
              "applied_invoices": ["2"]}]
     status = data.invoice_payment_status(invs, pays)
     # كل المبلغ يذهب إلى الفاتورة المحددة أولاً
@@ -191,7 +191,7 @@ def test_invoice_payment_status_specific_allocation(data):
 def test_invoice_payment_status_fifo_for_general_payments(data):
     invs = [_invoice("1", 100.0, date="2026-01-01"),
             _invoice("2", 100.0, date="2026-02-01")]
-    pays = [{"id": "p1", "customer": "Wazzan", "amount": 150.0, "applied_invoices": []}]
+    pays = [{"id": "p1", "customer": "East Port", "amount": 150.0, "applied_invoices": []}]
     status = data.invoice_payment_status(invs, pays)
     # الأقدم أولاً
     assert status["1"]["paid"] == pytest.approx(100.0)
@@ -202,8 +202,8 @@ def test_invoice_payment_status_fifo_for_general_payments(data):
 
 def test_dashboard_stats(data):
     invs = [_invoice("1", 100.0), _invoice("2", 100.0)]
-    pays = [{"id": "p1", "customer": "Wazzan", "amount": 40.0, "applied_invoices": []}]
-    stats = data.get_dashboard_stats(invs, pays, [{"name": "Wazzan"}])
+    pays = [{"id": "p1", "customer": "East Port", "amount": 40.0, "applied_invoices": []}]
+    stats = data.get_dashboard_stats(invs, pays, [{"name": "East Port"}])
     assert stats["invoice_count"] == 2
     assert stats["total_invoiced"] == pytest.approx(200.0)
     assert stats["total_paid"] == pytest.approx(40.0)
@@ -221,7 +221,7 @@ def test_dashboard_stats_empty(data):
 # ------------------------------------------------------------------ مرآة إكسل
 def _full_invoice(invno="010001", **over):
     inv = {
-        "invno": invno, "date": "2026-07-11", "customer": "Wazzan",
+        "invno": invno, "date": "2026-07-11", "customer": "East Port",
         "declno": "1", "decldate": "", "port": "", "containercount": "",
         "goodstype": "", "origin": "", "notes": "ملاحظة",
         "items": [{"label": "", "labelEn": "", "dinar": 0, "fils": 0}] * 24,
@@ -231,11 +231,11 @@ def _full_invoice(invno="010001", **over):
 
 
 def test_excel_mirror_written_after_save(data, tmp_path):
-    data.save_customer({"name": "Wazzan", "company_code": "01"})
+    data.save_customer({"name": "East Port", "company_code": "01"})
     items = [{"label": "خدمة مخصصة", "labelEn": "Custom", "dinar": 10, "fils": 250}]
     items += [{"label": "", "labelEn": "", "dinar": 0, "fils": 0}] * 23
     data.save_invoice(_full_invoice(items=items))
-    data.save_payment({"id": "010001", "customer": "Wazzan", "amount": 5.0,
+    data.save_payment({"id": "010001", "customer": "East Port", "amount": 5.0,
                        "applied_invoices": ["010001"]})
 
     wb = load_workbook(tmp_path / "data.xlsx")
