@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 >nul
-setlocal
+setlocal enabledelayedexpansion
 
 echo ================================================================
 echo   بناء ملف تشغيل (.exe) - نظام فواتير شركة التخليص الجمركي للفوترة
@@ -25,7 +25,7 @@ if not exist "main.py" (
     pause
     exit /b 1
 )
-if not exist "customs_clearance_billing\main.py" (
+if not exist "customs_clearance_billing\__init__.py" (
     echo [خطأ] لم أجد مجلد customs_clearance_billing بجانب main.py.
     pause
     exit /b 1
