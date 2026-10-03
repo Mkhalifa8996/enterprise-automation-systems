@@ -157,11 +157,11 @@ def seed_demo_data():
     from customs_clearance_billing.data import save_customer, save_invoice, save_payment
 
     customers = [
-        {"name": "Al Estidama Co.", "phone": "+965 6000 0000",
+        {"name": "National Trade Co.", "phone": "+965 6000 0000",
          "address": "Hawalli, Kuwait", "notes": "عميل دائم", "company_code": "01"},
-        {"name": "Gulf Shipping", "phone": "+965 2222 1111",
+        {"name": "Gulf Shipping Co.", "phone": "+965 2222 1111",
          "address": "Shuwaikh, Kuwait", "notes": "", "company_code": "02"},
-        {"name": "National Trade", "phone": "+965 3333 4444",
+        {"name": "Horizon Freight", "phone": "+965 3333 4444",
          "address": "Mangaf, Kuwait", "notes": "", "company_code": "03"},
     ]
     for c in customers:
@@ -172,14 +172,14 @@ def seed_demo_data():
                  "fils": fils if i == 0 else 0} for i in range(24)]
 
     invoices = [
-        ("010001", "2026-07-11", "Al Estidama Co.", "434343", "الشعب", "2", 182.0),
-        ("010002", "2026-07-11", "Al Estidama Co.", "223232", "الشعب", "1", 696.066),
-        ("020001", "2026-07-15", "Gulf Shipping", "34343", "الشويخ", "4", 435.0),
-        ("010003", "2026-07-30", "Al Estidama Co.", "544", "الشعب", "3", 865.006),
-        ("010004", "2026-07-30", "Al Estidama Co.", "3232", "الدعية", "2", 160.0),
-        ("020002", "2026-08-02", "Gulf Shipping", "77120", "الشويخ", "5", 1240.5),
-        ("030001", "2026-08-05", "National Trade", "90901", "المنقف", "1", 512.25),
-        ("010005", "2026-08-09", "Al Estidama Co.", "61122", "الشعب", "2", 330.0),
+        ("010001", "2026-07-11", "Horizon Freight", "434343", "الشعب", "2", 182.0),
+        ("010002", "2026-07-11", "Horizon Freight", "223232", "الشعب", "1", 696.066),
+        ("020001", "2026-07-15", "Gulf Shipping Co.", "34343", "الشويخ", "4", 435.0),
+        ("010003", "2026-07-30", "Horizon Freight", "544", "الشعب", "3", 865.006),
+        ("010004", "2026-07-30", "Horizon Freight", "3232", "الدعية", "2", 160.0),
+        ("020002", "2026-08-02", "Gulf Shipping Co.", "77120", "الشويخ", "5", 1240.5),
+        ("030001", "2026-08-05", "Horizon Freight", "90901", "المنقف", "1", 512.25),
+        ("010005", "2026-08-09", "Horizon Freight", "61122", "الشعب", "2", 330.0),
     ]
     for invno, date, customer, declno, port, cnt, total in invoices:
         dinar = int(total)
@@ -192,10 +192,10 @@ def seed_demo_data():
         })
 
     payments = [
-        ("010001", "Al Estidama Co.", "2026-07-30", 600.0, "دفعة نقدية", ["010001"]),
-        ("010002", "Al Estidama Co.", "2026-07-31", 865.006, "", ["010003"]),
-        ("010003", "Al Estidama Co.", "2026-08-01", 160.0, "شيك", ["010004"]),
-        ("020001", "Gulf Shipping", "2026-08-03", 400.0, "", ["020001"]),
+        ("010001", "Horizon Freight", "2026-07-30", 600.0, "دفعة نقدية", ["010001"]),
+        ("010002", "Horizon Freight", "2026-07-31", 865.006, "", ["010003"]),
+        ("010003", "Horizon Freight", "2026-08-01", 160.0, "شيك", ["010004"]),
+        ("020001", "Gulf Shipping Co.", "2026-08-03", 400.0, "", ["020001"]),
     ]
     for pid, customer, date, amount, notes, applied in payments:
         save_payment({"id": pid, "customer": customer, "date": date,
@@ -231,7 +231,7 @@ def main():
     app.notebook.select(app.tab_payments)
     app.refresh_payments_list()
     app.refresh_balances()
-    app.p_customer.set("Al Estidama Co.")
+    app.p_customer.set("Horizon Freight")
     app._on_payment_customer_changed()
     app.update_idletasks()
     app.update()
@@ -240,7 +240,7 @@ def main():
     # ملء الجدول قبل الالتقاط مباشرة.
     app.p_customer.set("")
     app._on_payment_customer_changed()
-    app.p_customer.set("Al Estidama Co.")
+    app.p_customer.set("Horizon Freight")
     app._on_payment_customer_changed()
     for _ in range(4):
         app.update_idletasks()
@@ -251,7 +251,7 @@ def main():
 
     form = InvoiceForm(app, invoice=None)
     form.geometry("980x760+120+80")
-    form.vars["customer"].set("Al Estidama Co.")
+    form.vars["customer"].set("Horizon Freight")
     form._update_invno_for_customer()
     form.item_dinar_vars[0].set("250")
     form.item_fils_vars[0].set("750")

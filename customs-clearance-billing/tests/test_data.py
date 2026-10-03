@@ -29,7 +29,7 @@ def data(tmp_path, monkeypatch):
     return data_pkg
 
 
-def make_invoice(invno="010001", customer="Wazzan", **overrides):
+def make_invoice(invno="010001", customer="East Port", **overrides):
     inv = {
         "invno": invno,
         "date": "2026-07-11",
@@ -61,18 +61,18 @@ def make_items(dinar=0, fils=0, count=1):
 
 # ------------------------------------------------------------------ العملاء
 def test_customers_crud(data):
-    data.save_customer({"name": "Wazzan", "phone": "123", "address": "a", "notes": "n",
+    data.save_customer({"name": "East Port", "phone": "123", "address": "a", "notes": "n",
                         "company_code": "1"})
-    assert [c["name"] for c in data.load_customers()] == ["Wazzan"]
+    assert [c["name"] for c in data.load_customers()] == ["East Port"]
     # company_code يُطبَّع إلى رقمين
     assert data.load_customers()[0]["company_code"] == "01"
 
-    data.save_customer({"name": "Wazzan", "phone": "999", "company_code": "01"})
+    data.save_customer({"name": "East Port", "phone": "999", "company_code": "01"})
     updated = data.load_customers()[0]
     assert updated["phone"] == "999"
     assert len(data.load_customers()) == 1  # التحديث لا يُنشئ نسخة مكررة
 
-    data.delete_customer("Wazzan")
+    data.delete_customer("East Port")
     assert data.load_customers() == []
 
 
@@ -125,7 +125,7 @@ def test_save_invoice_requires_number(data):
 # ------------------------------------------------------------------ الدفعات
 def test_payment_crud_and_allocation_order(data):
     data.save_invoice(make_invoice("010001", items=make_items(dinar=100)))
-    data.save_payment({"id": "010001", "customer": "Wazzan", "date": "2026-07-30",
+    data.save_payment({"id": "010001", "customer": "East Port", "date": "2026-07-30",
                        "amount": 40.0, "notes": "", "applied_invoices": ["010001"]})
     p = data.load_payments()[0]
     assert p["amount"] == pytest.approx(40.0)
