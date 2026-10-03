@@ -6,7 +6,7 @@ A repository containing three independent projects:
 |---|---|---|
 | [`TransportSystem/`](TransportSystem/) | Transport Management System | Desktop app for trips, drivers, invoices, salaries and financial reports |
 | [`customs-billing/`](customs-billing/) | Customs Billing | Invoice & collection system for customs billing, SQLite with an Excel mirror |
-| [`restaurant-catering-manager/`](restaurant-catering-manager/) | Restaurant & Catering Manager | Arabic (RTL) desktop app for catering businesses: institutional orders, events, invoicing, payroll and reports |
+| [`catering-management-system/`](catering-management-system/) | Catering Management System | Arabic (RTL) desktop app for catering businesses: institutional orders, events, invoicing, payroll and reports |
 
 Each project is fully self-contained: it has its own entry point, requirements
 and documentation.
@@ -96,23 +96,34 @@ which produces `customs-billing.exe`.
 
 ---
 
-## Restaurant & Catering Manager
+## Catering Management System
 
-Desktop system for a catering and banquet business with a full Arabic
-right-to-left interface. Covers institutional meal contracts, events and
+Desktop system for a catering business with a full Arabic right-to-left
+interface. Covers institutional meal contracts, events and
 weddings, invoicing with partial payments and customer statements, purchases,
 expenses, payroll and financial reports.
 
 SQLite is the default store; Excel is kept as an import/export format and is
 migrated automatically on first launch.
 
+| Invoices & statements | Reports & charts |
+|---|---|
+| ![Invoices](catering-management-system/screenshots/03-invoices.png) | ![Reports](catering-management-system/screenshots/07-reports.png) |
+
+| Home | Orders & events |
+|---|---|
+| ![Home](catering-management-system/screenshots/01-home.png) | ![Orders](catering-management-system/screenshots/02-orders.png) |
+
+All seven screens are in
+[`catering-management-system/README.md`](catering-management-system/README.md#screens).
+
 ```bash
-cd restaurant-catering-manager
+cd catering-management-system
 pip install -r requirements.txt
 python restaurant_desktop_app.py
 ```
 
-Full documentation: [`restaurant-catering-manager/README.md`](restaurant-catering-manager/README.md).
+Full documentation: [`catering-management-system/README.md`](catering-management-system/README.md).
 
 The project is organised into focused modules rather than one large file:
 
@@ -127,21 +138,21 @@ The project is organised into focused modules rather than one large file:
 **The source contains no business data.** The database, Excel workbooks,
 backups and logs are created on first run and excluded by
 [.gitignore](.gitignore). Company details are set in
-`restaurant-catering-manager/core/data/config.py`.
+`catering-management-system/core/data/config.py`.
 
 The test suite runs against temporary files and never touches real data:
 
 ```bash
-cd restaurant-catering-manager
+cd catering-management-system
 python -m pytest
 ```
 
 CI (lint plus the suite on Linux and Windows) is defined in
-[`.github/workflows/restaurant-manager.yml`](.github/workflows/restaurant-manager.yml).
+[`.github/workflows/catering-system.yml`](.github/workflows/catering-system.yml).
 
 To build a standalone executable, run
-`restaurant-catering-manager\build_exe.bat`, which produces
-`RestaurantManager.exe`.
+`catering-management-system\build_exe.bat`, which produces
+`CateringManager.exe`.
 
 ---
 

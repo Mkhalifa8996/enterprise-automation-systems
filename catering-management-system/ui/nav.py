@@ -26,9 +26,9 @@ class Sidebar(tk.Frame):
         brand = tk.Frame(self, bg=COLOR_PRIMARY)
         brand.pack(fill="x", pady=(24, 10))
         tk.Label(brand, text="🍽", font=(FONT_NAME, 26), bg=COLOR_PRIMARY, fg=COLOR_ACCENT).pack()
-        tk.Label(brand, text="نظام إدارة المطعم", font=(FONT_NAME, 13, "bold"),
+        tk.Label(brand, text="نظام إدارة الضيافة", font=(FONT_NAME, 13, "bold"),
                  bg=COLOR_PRIMARY, fg="white").pack(pady=(4, 0))
-        tk.Label(brand, text="Catering & Events", font=(FONT_NAME, 8),
+        tk.Label(brand, text="Catering Management System", font=(FONT_NAME, 8),
                  bg=COLOR_PRIMARY, fg="#E4C9A8").pack()
 
         sep = tk.Frame(self, bg=COLOR_ACCENT, height=2)

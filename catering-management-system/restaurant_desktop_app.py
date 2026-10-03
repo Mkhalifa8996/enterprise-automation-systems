@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-نظام إدارة مطعم التموين والولائم - عمال وشيفات، معدات وسيارات توصيل،
+نظام إدارة الضيافة - عمال وشيفات، معدات وسيارات توصيل،
 مصاريف تأسيس، مصاريف شهرية ثابتة، مشتريات يومية (خضروات/لحوم/خبز/أرز
 وبقوليات/غاز/زيوت)، عملاء (مؤسسات ومناسبات)، طلبات مؤسسات دائمة (شركات/
 مستشفيات/مدارس)، عزائم ومناسبات (أفراح وعزائم بتاريخ محدد)، فواتير
@@ -65,7 +65,7 @@ class RestaurantApp(HomePages, OrdersPages, ExpensesPages, MasterDataPages,
                     InvoicesPages, SalariesPages, ReportsPages, tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title(f"نظام إدارة مطعم التموين والولائم — v{__version__}")
+        self.title(f"نظام إدارة الضيافة — v{__version__}")
         self.geometry("1340x780")
         self.configure(bg=COLOR_BG)
         self.minsize(1080, 660)

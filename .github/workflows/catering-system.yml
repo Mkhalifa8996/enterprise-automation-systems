@@ -1,17 +1,17 @@
-name: Restaurant Manager CI
+name: Catering Management System CI
 
 on:
   push:
-    paths: ["restaurant-catering-manager/**", ".github/workflows/restaurant-manager.yml"]
+    paths: ["catering-management-system/**", ".github/workflows/catering-system.yml"]
   pull_request:
-    paths: ["restaurant-catering-manager/**", ".github/workflows/restaurant-manager.yml"]
+    paths: ["catering-management-system/**", ".github/workflows/catering-system.yml"]
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: restaurant-catering-manager
+        working-directory: catering-management-system
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: restaurant-catering-manager
+        working-directory: catering-management-system
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -38,7 +38,7 @@ jobs:
     runs-on: windows-latest
     defaults:
       run:
-        working-directory: restaurant-catering-manager
+        working-directory: catering-management-system
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

@@ -1,14 +1,40 @@
-# Restaurant & Catering Manager
+# Catering Management System
 
-نظام إدارة مطعم التموين والولائم — تطبيق سطح مكتب بواجهة عربية (RTL) لإدارة
-مؤسسات الضيافة: طلبات المؤسسات الدائمة، المناسبات والولائم، الفواتير والتحصيل،
-المشتريات والمصاريف، الرواتب، والتقارير المالية.
+نظام إدارة الضيافة — تطبيق سطح مكتب بواجهة عربية (RTL) لإدارة مؤسسات الضيافة:
+طلبات المؤسسات الدائمة، المناسبات والولائم، الفواتير والتحصيل، المشتريات
+والمصاريف، الرواتب، والتقارير المالية.
 
-Desktop application for a catering/banquet business: institutional meal
-contracts, events & weddings, invoicing and receivables, purchases, expenses,
-payroll, and financial reports — with a full Arabic right-to-left interface.
+Catering management desktop application: institutional meal contracts, events &
+weddings, invoicing and receivables, purchases, expenses, payroll, and financial
+reports — with a full Arabic right-to-left interface.
 
 **Version:** 2.3.0 · **Language:** Python 3.11+ · **UI:** Tkinter · **Storage:** SQLite (Excel import/export)
+
+![Home screen](screenshots/01-home.png)
+
+---
+
+## Screens
+
+| Home | Orders & events |
+|---|---|
+| ![Home](screenshots/01-home.png) | ![Orders](screenshots/02-orders.png) |
+
+| Invoices & statements | Expenses & purchases |
+|---|---|
+| ![Invoices](screenshots/03-invoices.png) | ![Expenses](screenshots/04-expenses.png) |
+
+| Master data | Payroll |
+|---|---|
+| ![Master data](screenshots/05-masterdata.png) | ![Salaries](screenshots/06-salaries.png) |
+
+| Financial reports & charts |
+|---|
+| ![Reports](screenshots/07-reports.png) |
+
+Regenerate them any time with `python capture_screenshots.py` — it builds a
+throwaway database with demo data and captures each screen, so your real data is
+never touched.
 
 ---
 
