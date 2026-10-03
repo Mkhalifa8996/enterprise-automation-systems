@@ -1,0 +1,26 @@
+# Normalize line endings in the repository so Windows and Linux/macOS
+# checkouts of the same commit do not produce endless diffs.
+* text=auto eol=lf
+
+# Python source and scripts
+*.py    text eol=lf diff=python
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+
+# Text/config
+*.md    text eol=lf
+*.txt   text eol=lf
+*.json  text eol=lf
+*.js    text eol=lf
+*.css   text eol=lf
+*.html  text eol=lf
+*.spec  text eol=lf
+.gitignore    text eol=lf
+.env.example text eol=lf
+
+# Binary assets
+*.png  binary
+*.jpg  binary
+*.ico  binary
+*.db   binary
+*.xlsx binary

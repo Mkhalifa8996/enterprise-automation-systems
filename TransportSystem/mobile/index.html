@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1a2b4a">
+  <title>إدارة النقل</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <section id="login-view" class="auth-card">
+      <div class="brand-mark">ن</div>
+      <h1>إدارة النقل</h1>
+      <p>سجّل الدخول للوصول إلى بيانات الشركة.</p>
+      <label for="email">البريد الإلكتروني</label>
+      <input id="email" type="email" autocomplete="email" placeholder="name@example.com">
+      <label for="password">كلمة المرور</label>
+      <input id="password" type="password" autocomplete="current-password" placeholder="••••••••">
+      <p id="login-error" class="error" role="alert"></p>
+      <button id="login-btn" class="primary">تسجيل الدخول</button>
+    </section>
+
+    <section id="dashboard-view" hidden>
+      <header class="topbar">
+        <div><span class="eyebrow">نظام النقل</span><h1>مرحبًا</h1></div>
+        <button id="logout-btn" class="text-button">خروج</button>
+      </header>
+      <p id="sync-status" class="sync-status">جارٍ تحميل البيانات…</p>
+      <nav class="tabs" role="tablist">
+        <button class="tab is-active" data-tab="tab-trips" role="tab">الرحلات</button>
+        <button class="tab" data-tab="tab-drivers" role="tab">السائقون</button>
+        <button class="tab" data-tab="tab-partners" role="tab">الشركاء</button>
+      </nav>
+
+      <div class="stats">
+        <article><span>الرحلات</span><strong id="trips-count">0</strong></article>
+        <article><span>السيارات</span><strong id="vehicles-count">0</strong></article>
+        <article><span>الفواتير</span><strong id="invoices-count">0</strong></article>
+        <article><span>السائقون</span><strong id="drivers-count">0</strong></article>
+        <article><span>خارجي</span><strong id="external-drivers-count">0</strong></article>
+        <article><span>الشركاء</span><strong id="partners-count">0</strong></article>
+        <article><span>دفعات الشركاء</span><strong id="partner-payments-count">0</strong></article>
+        <article><span>سجلات</span><strong id="records-count">0</strong></article>
+      </div>
+
+      <section class="panel is-active" id="tab-trips" role="tabpanel">
+        <div class="section-heading"><h2>أحدث الرحلات</h2></div>
+        <div id="trips-list" class="trips-list"></div>
+      </section>
+
+      <section class="panel" id="tab-drivers" role="tabpanel" hidden>
+        <div class="section-heading"><h2>السائقون</h2><span>داخلي وخارجي</span></div>
+        <div id="drivers-list" class="trips-list"></div>
+      </section>
+
+      <section class="panel" id="tab-partners" role="tabpanel" hidden>
+        <div class="section-heading"><h2>الشركاء ونسبهم</h2></div>
+        <div id="partners-list" class="trips-list"></div>
+        <div class="section-heading"><h2>دفعات الشركاء</h2></div>
+        <div id="partner-payments-list" class="trips-list"></div>
+      </section>
+    </section>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
