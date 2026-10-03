@@ -26,7 +26,6 @@ dist/
 # The SQLite database and its Excel exports hold live business data.
 transport_data.db
 *.xlsx
-!AlEstidamaInvoices/data.xlsx
 app_errors.log
 app_errors.log.1
 backups/
