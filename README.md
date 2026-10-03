@@ -1,11 +1,12 @@
 # Enterprise Automation Systems
 
-A repository containing two independent projects:
+A repository containing three independent projects:
 
 | Folder | Project | Description |
 |---|---|---|
 | [`TransportSystem/`](TransportSystem/) | Transport Management System | Desktop app for trips, drivers, invoices, salaries and financial reports |
 | [`customs-billing/`](customs-billing/) | Customs Billing | Invoice & collection system for customs billing, SQLite with an Excel mirror |
+| [`restaurant-catering-manager/`](restaurant-catering-manager/) | Restaurant & Catering Manager | Arabic (RTL) desktop app for catering businesses: institutional orders, events, invoicing, payroll and reports |
 
 Each project is fully self-contained: it has its own entry point, requirements
 and documentation.
@@ -92,6 +93,55 @@ python -m pytest tests -q
 
 To build a standalone executable, run `customs-billing\build_exe.bat`,
 which produces `customs-billing.exe`.
+
+---
+
+## Restaurant & Catering Manager
+
+Desktop system for a catering and banquet business with a full Arabic
+right-to-left interface. Covers institutional meal contracts, events and
+weddings, invoicing with partial payments and customer statements, purchases,
+expenses, payroll and financial reports.
+
+SQLite is the default store; Excel is kept as an import/export format and is
+migrated automatically on first launch.
+
+```bash
+cd restaurant-catering-manager
+pip install -r requirements.txt
+python restaurant_desktop_app.py
+```
+
+Full documentation: [`restaurant-catering-manager/README.md`](restaurant-catering-manager/README.md).
+
+The project is organised into focused modules rather than one large file:
+
+- `restaurant_data.py` — thin public data API (a facade over `core/data`)
+- `core/data/` — `config` (schema), `validation`, `runtime` (mutable state),
+  `sqlite`, `storage` (generic CRUD, atomic saves, backups, audit log)
+- `core/data/repos/` — business rules, one module per domain
+- `core/` — money (Decimal), analytics, Arabic PDF output
+- `ui/` — theme, navigation, shared tabs and one mixin per screen group
+- `tests/` — six suites covering the data layer, safety, both backends and the UI
+
+**The source contains no business data.** The database, Excel workbooks,
+backups and logs are created on first run and excluded by
+[.gitignore](.gitignore). Company details are set in
+`restaurant-catering-manager/core/data/config.py`.
+
+The test suite runs against temporary files and never touches real data:
+
+```bash
+cd restaurant-catering-manager
+python -m pytest
+```
+
+CI (lint plus the suite on Linux and Windows) is defined in
+[`.github/workflows/restaurant-manager.yml`](.github/workflows/restaurant-manager.yml).
+
+To build a standalone executable, run
+`restaurant-catering-manager\build_exe.bat`, which produces
+`RestaurantManager.exe`.
 
 ---
 

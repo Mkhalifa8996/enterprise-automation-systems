@@ -1,0 +1,28 @@
+# بايثون
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# بيانات المستخدم الفعلية (تُنشأ عند التشغيل ولا تُرفع أبداً)
+restaurant.db
+*.db
+*.db-wal
+*.db-shm
+restaurant_data.xlsx
+*.bak.xlsx
+restaurant_data.xlsx.tmp
+restaurant_export_*.xlsx
+attachments/
+logs/
+backups/
+
+# ملفات القفل وأدوات المطور
+*.lock
+_repair_*.py
+.kilo/
+
+# مخرجات البناء
+build/
+dist/
+*.spec

@@ -1,0 +1,42 @@
+[project]
+name = "restaurant-catering-manager"
+version = "2.3.0"
+description = "نظام إدارة مطعم التموين والولائم — تطبيق سطح مكتب Tkinter بواجهة عربية على طبقة بيانات واحدة"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["openpyxl>=3.1"]
+
+[project.optional-dependencies]
+web = ["fastapi>=0.110", "uvicorn[standard]>=0.29", "jinja2>=3.1", "python-multipart>=0.0.9"]
+charts = ["matplotlib>=3.8"]
+pdf = ["reportlab>=4.0", "arabic-reshaper>=3.0", "python-bidi>=0.4"]
+dev = ["pytest>=8.0", "ruff>=0.4", "httpx>=0.27"]
+all = ["restaurant-catering-manager[web,charts,pdf,dev]"]
+
+[project.scripts]
+restaurant-manager = "restaurant_desktop_app:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+# المشروع تطبيق سطح مكتب يبدأ من ملف في الجذر، والحزم هي وحدتا المنطق والواجهة
+packages = ["core", "core.data", "core.data.repos", "ui", "ui.pages"]
+py-modules = ["restaurant_data", "restaurant_desktop_app", "migrate_to_sqlite"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+# نستثني سكربتات الاختبار القديمة من قواعد الأسلوب مؤقتاً (تُحوَّل إلى pytest لاحقاً)
+extend-exclude = ["tests", "backups", "logs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]     # الأخطاء الفعلية فقط في هذه المرحلة، الأسلوب لاحقاً
+ignore = ["E501"]            # طول السطر: العربية العريضة تخالف القياس
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# الاختبارات القديمة سكربتات تنفيذية؛ الجسر tests/test_suites.py يشغّلها كعمليات فرعية
+python_files = ["test_suites.py", "test_modern.py"]
+filterwarnings = ["ignore::UserWarning"]
